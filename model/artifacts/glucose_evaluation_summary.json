@@ -1,0 +1,66 @@
+{
+  "model_name": "AeroTwin Dual Glucose Forecaster (HistGradientBoosting)",
+  "target_definition": "High Glucose Excursion (>= 180 mg/dL within 120 minutes) & Continuous Glucose (mg/dL at t+120m)",
+  "partition_strategy": "Strict Forward Temporal Holdout (Days 1-5 Train, Days 6-7 Test)",
+  "patients_evaluated": [
+    "SYN-T2D-001",
+    "SYN-T2D-002",
+    "SYN-T2D-003",
+    "SYN-T2D-004",
+    "SYN-T2D-005"
+  ],
+  "train_samples_count": 7080,
+  "test_samples_count": 2760,
+  "feature_count": 21,
+  "feature_names": [
+    "glucose_current",
+    "rate_of_change_15m",
+    "rate_of_change_30m",
+    "rate_of_change_60m",
+    "rolling_mean_60m",
+    "rolling_mean_120m",
+    "rolling_std_120m",
+    "rolling_max_120m",
+    "rolling_min_120m",
+    "heart_rate_bpm",
+    "hrv_sdnn_ms",
+    "steps_current_epoch",
+    "steps_past_30m",
+    "steps_past_60m",
+    "sin_hour",
+    "cos_hour",
+    "ehr_hba1c",
+    "ehr_fbg",
+    "ehr_bmi",
+    "ehr_age",
+    "ehr_has_insulin"
+  ],
+  "classification_metrics": {
+    "model_accuracy": 0.9678,
+    "model_precision": 0.986,
+    "model_recall": 0.9715,
+    "model_f1": 0.9787,
+    "model_roc_auc": 0.9927,
+    "model_pr_auc": 0.9979,
+    "confusion_matrix": {
+      "true_negative": 628,
+      "false_positive": 29,
+      "false_negative": 60,
+      "true_positive": 2043
+    },
+    "baseline_heuristic_accuracy": 0.8902,
+    "baseline_heuristic_precision": 0.9403,
+    "baseline_heuristic_recall": 0.9139,
+    "baseline_heuristic_f1": 0.9269
+  },
+  "continuous_forecasting_metrics": {
+    "model_mae_mg_dl": 6.16,
+    "model_rmse_mg_dl": 7.83,
+    "model_r2": 0.9444,
+    "baseline_persistence_mae": 14.44,
+    "baseline_persistence_rmse": 18.13,
+    "baseline_persistence_r2": 0.7017,
+    "rmse_improvement_pct": 56.83
+  },
+  "scientific_integrity_notice": "Evaluation performed strictly on an independent held-out patient (SYN-T2D-003) with zero temporal or spatial overlap with training observations. This is a prototype predictive algorithm intended for clinical decision support; it is NOT clinically approved as an autonomous medical diagnostic device."
+}

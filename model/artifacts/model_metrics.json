@@ -1,0 +1,28 @@
+{
+  "model_type": "HistGradientBoostingRegressor",
+  "target": "Next-Day PM2.5 (ug/m3)",
+  "features_count": 73,
+  "train_rows": 16259,
+  "val_rows": 5209,
+  "test_rows": 6614,
+  "train_period": "2015-01-01 to 2018-12-31",
+  "val_period": "2019-01-01 to 2019-09-30",
+  "test_period": "2019-10-01 to 2020-07-01",
+  "baseline_persistence": {
+    "mae": 12.3,
+    "rmse": 21.97,
+    "r2": 0.7831
+  },
+  "model_validation": {
+    "mae": 12.19,
+    "rmse": 28.08,
+    "r2": 0.6612
+  },
+  "model_test": {
+    "mae": 12.15,
+    "rmse": 20.34,
+    "r2": 0.814
+  },
+  "rmse_improvement_pct": 7.42,
+  "limitations": "Model forecasts ambient atmospheric PM2.5 concentrations based on historical time-series. It does NOT predict clinical health outcomes, patient admissions, or physiological symptoms."
+}

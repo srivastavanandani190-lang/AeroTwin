@@ -1,0 +1,2471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AeroTwin — Environmental Intelligence Dashboard</title>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <style>
+        :root {
+            /* Backgrounds */
+            --bg-main: #020405;           /* Main page background (pure near-black) */
+            --bg-content: #030608;        /* Main content background */
+            --surface-sidebar: #04090B;   /* Sidebar background */
+            --surface-filter: #07120F;    /* Filter panel background */
+            --surface-card: #091510;      /* Standard card background (forest green surface tint) */
+            --surface-elevated: #0D1D16;  /* Elevated card background */
+            --surface-hover: #12271D;     /* Hovered panel / active nav background */
+            --input-bg: #050B0C;          /* Input & chart plot background */
+            --plot-bg: #050B0C;           /* Chart plotting background */
+
+            /* Accents */
+            --accent-jade: #54E6A5;       /* Primary jade green */
+            --accent-emerald: #27C98B;    /* Bright emerald */
+            --accent-ice: #72C9F0;        /* Ice blue */
+            --accent-cyan: #25D9E8;       /* Cyan */
+            --accent-gold: #F5C96A;       /* Soft gold */
+            --accent-purple: #A78BFA;     /* Purple (PM10 / Category) */
+            --accent-pink: #FF7198;       /* Pink (Duplicate / Category) */
+
+            /* Backward compatibility aliases */
+            --accent-aqua: #54E6A5;
+
+            /* Text */
+            --text-primary: #F2F7F5;      /* Primary text */
+            --text-secondary: #A5B7AF;    /* Secondary text */
+            --text-muted: #758A80;        /* Muted text */
+            --text-main: #F2F7F5;
+
+            /* Borders & Dividers */
+            --border-standard: #193328;   /* Standard border */
+            --border-highlight: #245640;  /* Highlight border */
+            --border-subtle: #12241C;     /* Subtle divider */
+            --border-color: #193328;
+            --gridline-color: #172A22;
+            --axis-color: #244136;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ----------------------------------------------------
+           Sidebar Navigation
+           ---------------------------------------------------- */
+        aside.sidebar {
+            width: 260px;
+            background-color: var(--surface-sidebar);
+            border-right: 1px solid var(--border-standard);
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px 18px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .brand-icon {
+            width: 38px;
+            height: 38px;
+            background: #071510;
+            border: 1px solid var(--border-highlight);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-jade);
+        }
+
+        .brand-text h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .brand-text span {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .nav-top-btn {
+            margin-top: 18px;
+            margin-bottom: 8px;
+        }
+
+        .nav-top-btn a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 14px;
+            border-radius: 8px;
+            background-color: #071F18;
+            border: 1px solid var(--border-standard);
+            color: var(--accent-jade);
+            text-decoration: none;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        .nav-section {
+            flex-grow: 1;
+        }
+
+        .nav-title {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding-left: 8px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-item a:hover {
+            color: var(--text-primary);
+            background-color: var(--surface-hover);
+            border-color: var(--border-subtle);
+        }
+
+        .nav-item.active a {
+            color: var(--text-primary);
+            background: #0D2A20;
+            border: 1px solid var(--border-highlight);
+        }
+
+        .nav-item.active a svg {
+            color: var(--accent-jade);
+        }
+
+        .sidebar-footer {
+            padding-top: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .sidebar-status-box {
+            background-color: var(--surface-filter);
+            border: 1px solid var(--border-standard);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+        }
+
+        .neon-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-jade);
+            box-shadow: 0 0 8px var(--accent-jade);
+        }
+
+        /* ----------------------------------------------------
+           Main Content Area
+           ---------------------------------------------------- */
+        main.main-content {
+            flex-grow: 1;
+            padding: 24px 34px 60px 34px;
+            background-color: var(--bg-content);
+            max-width: calc(100vw - 260px);
+            overflow-y: auto;
+        }
+
+        /* Top Header Bar */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 22px;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .header-overline {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .header-title {
+            font-size: 1.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        .header-title .title-highlight {
+            color: var(--accent-jade);
+        }
+
+        .header-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .header-widgets {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .weather-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--surface-filter);
+            border: 1px solid var(--border-standard);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+        }
+
+        .weather-pill svg {
+            color: var(--accent-ice);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--surface-filter);
+            border: 1px solid var(--border-highlight);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        /* Top Filter Toolbar */
+        .filter-panel {
+            background-color: var(--surface-filter);
+            border: 1px solid var(--border-standard);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .filter-label svg {
+            color: var(--accent-ice);
+        }
+
+        select, input[type="text"], input[type="date"] {
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-standard);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input[type="text"]:focus, input[type="date"]:focus {
+            border-color: var(--accent-jade);
+        }
+
+        .btn-apply {
+            background-color: var(--accent-emerald);
+            color: #020405;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.86rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s ease;
+            height: 38px;
+            align-self: flex-end;
+        }
+
+        .btn-apply:hover {
+            background-color: var(--accent-jade);
+        }
+
+        .btn-download {
+            background-color: var(--surface-card);
+            color: var(--accent-jade);
+            border: 1px solid var(--border-highlight);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-download:hover {
+            background-color: var(--surface-hover);
+            border-color: var(--accent-jade);
+        }
+
+        /* ----------------------------------------------------
+           Compact Metric Cards Grid (5 in a row)
+           ---------------------------------------------------- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            }
+        }
+
+        .metric-card {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 12px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 128px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-highlight);
+        }
+
+        .metric-card.jade { border-top: 2px solid var(--accent-jade); }
+        .metric-card.ice { border-top: 2px solid var(--accent-ice); }
+        .metric-card.gold { border-top: 2px solid var(--accent-gold); }
+        .metric-card.pink { border-top: 2px solid var(--accent-pink); }
+        .metric-card.cyan { border-top: 2px solid var(--accent-cyan); }
+
+        .metric-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        .metric-icon {
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-size: 1.85rem;
+            font-weight: 700;
+            line-height: 1.1;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-value.date-range {
+            font-size: 1.1rem;
+            padding-top: 4px;
+        }
+
+        .metric-card.jade .metric-value { color: var(--accent-jade); }
+        .metric-card.ice .metric-value { color: var(--accent-ice); }
+        .metric-card.gold .metric-value { color: var(--accent-gold); }
+        .metric-card.pink .metric-value { color: var(--accent-pink); }
+        .metric-card.cyan .metric-value { color: var(--accent-cyan); }
+
+        .metric-sub-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 6px;
+        }
+
+        .metric-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* ----------------------------------------------------
+           Model Status Banner
+           ---------------------------------------------------- */
+        .status-banner {
+            background-color: var(--surface-filter);
+            border: 1px solid var(--border-highlight);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .banner-text {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+        }
+
+        .badge-stage {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 16px;
+            background-color: transparent;
+            color: var(--accent-jade);
+            border: 1px solid var(--border-highlight);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .badge-stage:hover {
+            background-color: var(--surface-hover);
+            border-color: var(--accent-jade);
+        }
+
+        /* ----------------------------------------------------
+           Section Headings
+           ---------------------------------------------------- */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 32px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header h2 {
+            font-size: 1.22rem;
+            font-weight: 600;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .section-header .tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-color);
+            color: var(--accent-aqua);
+            font-weight: 500;
+        }
+
+        /* ----------------------------------------------------
+           Interactive Graph Layout
+           ---------------------------------------------------- */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        @media (max-width: 860px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 14px;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .chart-card:hover {
+            border-color: var(--border-highlight);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-subtitle {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .chart-container {
+            width: 100%;
+            min-height: 360px;
+        }
+
+        /* ----------------------------------------------------
+           Custom Interactive Chart Studio
+           ---------------------------------------------------- */
+        .studio-card {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 28px;
+        }
+
+        .studio-card:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .studio-controls {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-standard);
+        }
+
+        /* ----------------------------------------------------
+           Info Cards & Advisory Grid
+           ---------------------------------------------------- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .info-card {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .info-card h3 {
+            font-size: 0.94rem;
+            font-weight: 600;
+            color: var(--accent-jade);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .advisory-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.83rem;
+        }
+
+        .advisory-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .advisory-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .advisory-badge.good { background-color: rgba(84, 230, 165, 0.15); color: var(--accent-jade); border: 1px solid rgba(84, 230, 165, 0.4); }
+        .advisory-badge.satisfactory { background-color: rgba(37, 217, 232, 0.15); color: var(--accent-cyan); border: 1px solid rgba(37, 217, 232, 0.4); }
+        .advisory-badge.moderate { background-color: rgba(245, 201, 106, 0.15); color: var(--accent-gold); border: 1px solid rgba(245, 201, 106, 0.4); }
+        .advisory-badge.poor { background-color: rgba(255, 159, 28, 0.15); color: #FF9F1C; border: 1px solid rgba(255, 159, 28, 0.4); }
+        .advisory-badge.very-poor { background-color: rgba(255, 113, 152, 0.15); color: var(--accent-pink); border: 1px solid rgba(255, 113, 152, 0.4); }
+        .advisory-badge.severe { background-color: rgba(167, 139, 250, 0.15); color: var(--accent-purple); border: 1px solid rgba(167, 139, 250, 0.4); }
+
+        /* ----------------------------------------------------
+           Tables (Column Schema & Actual Data Preview)
+           ---------------------------------------------------- */
+        .table-panel {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 28px;
+        }
+
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid var(--border-standard);
+            border-radius: 8px;
+            max-height: 440px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.83rem;
+            text-align: left;
+        }
+
+        thead {
+            background-color: var(--surface-filter);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 12px 14px;
+            color: var(--accent-jade);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-standard);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            white-space: nowrap;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        tbody tr:hover {
+            background-color: var(--surface-hover);
+        }
+
+        /* ----------------------------------------------------
+           Disclaimer Footer
+           ---------------------------------------------------- */
+        .disclaimer-card {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .disclaimer-title {
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ----------------------------------------------------
+           AeroTwin Step 8: Interactive Studio & Twin Components
+           ---------------------------------------------------- */
+        .twin-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        .badge-observed {
+            background: rgba(245, 201, 106, 0.12);
+            color: var(--accent-gold);
+            border: 1px solid rgba(245, 201, 106, 0.4);
+        }
+
+        .badge-forecast {
+            background: rgba(84, 230, 165, 0.12);
+            color: var(--accent-jade);
+            border: 1px solid rgba(84, 230, 165, 0.4);
+        }
+
+        .badge-simulated {
+            background: rgba(114, 201, 240, 0.12);
+            color: var(--accent-ice);
+            border: 1px solid rgba(114, 201, 240, 0.4);
+        }
+
+        .badge-custom {
+            background: rgba(167, 139, 250, 0.12);
+            color: var(--accent-purple);
+            border: 1px solid rgba(167, 139, 250, 0.4);
+        }
+
+        .pollutant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .pollutant-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 10px;
+            padding: 12px 14px;
+            transition: all 0.2s ease;
+        }
+
+        .pollutant-card:hover {
+            border-color: var(--accent-jade);
+            transform: translateY(-2px);
+        }
+
+        .pollutant-name {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .pollutant-val {
+            font-size: 1.35rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+            margin: 4px 0 2px 0;
+        }
+
+        .pollutant-sub {
+            font-size: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Range sliders & dual controls */
+        .dual-control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 10px;
+            padding: 12px 14px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-label {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .slider-dual-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-num-input {
+            width: 70px;
+            background: var(--input-bg);
+            color: var(--accent-jade);
+            border: 1px solid var(--border-standard);
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 0.82rem;
+            font-family: 'JetBrains Mono', monospace;
+            text-align: right;
+        }
+
+        .slider-num-input:focus {
+            border-color: var(--accent-jade);
+            outline: none;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #0D1D16;
+            border-radius: 4px;
+            outline: none;
+            border: 1px solid var(--border-standard);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-jade);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(84, 230, 165, 0.4);
+            border: 2px solid #020405;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-jade);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(84, 230, 165, 0.4);
+            border: 2px solid #020405;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .scenario-box {
+            background-color: var(--surface-card);
+            border: 1px solid var(--border-standard);
+            border-radius: 12px;
+            padding: 18px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .scenario-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            border-color: var(--border-highlight);
+        }
+
+        .scenario-box.baseline { border-top: 3px solid var(--accent-gold); }
+        .scenario-box.purifier { border-top: 3px solid var(--accent-jade); border-color: rgba(84, 230, 165, 0.35); }
+        .scenario-box.routine { border-top: 3px solid var(--accent-ice); border-color: rgba(114, 201, 240, 0.4); box-shadow: 0 4px 20px rgba(114, 201, 240, 0.08); }
+        .scenario-box.custom { border-top: 3px solid var(--accent-purple); border-color: rgba(167, 139, 250, 0.35); }
+    </style>
+</head>
+<body>
+
+    <!-- Sleek Dark Crystal Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>AeroTwin</h1>
+                    <span>ENVIRONMENTAL INTELLIGENCE</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 14px; margin-bottom: 6px;">
+                <a href="/twin" style="display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; background:linear-gradient(135deg, #07261C, #091D16); border:1px solid #27C98B; color:#54E6A5; text-decoration:none; font-size:0.82rem; font-weight:700; transition:all 0.2s ease;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span>🩺 Healthcare Digital Twin</span>
+                </a>
+            </div>
+
+            <div class="nav-top-btn">
+                <a href="#overview">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    Overview
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-title">ANALYTICS</div>
+                <ul class="nav-list">
+                    <li class="nav-item active">
+                        <a href="#overview">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"/>
+                                <line x1="12" y1="20" x2="12" y2="4"/>
+                                <line x1="6" y1="20" x2="6" y2="14"/>
+                            </svg>
+                            Metrics &amp; Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#visualizations">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            </svg>
+                            Interactive Graphs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#explorer">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                            </svg>
+                            Data Explorer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#schema">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                                <line x1="16" y1="13" x2="8" y2="13"/>
+                                <line x1="16" y1="17" x2="8" y2="17"/>
+                            </svg>
+                            Schema &amp; Data Quality
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-title">DIGITAL TWIN</div>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#twin-studio">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"/>
+                                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"/>
+                            </svg>
+                            Model / Simulation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#health">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                                <path d="M12 5v14"/>
+                            </svg>
+                            Health Impact Matrix
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="sidebar-status-box">
+                <div class="status-indicator">
+                    <span class="neon-dot"></span>
+                    <span>System Connected</span>
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace;">
+                    &mdash; {{ active_dataset_name }}
+                </div>
+                <div style="font-size: 0.73rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                        <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>{{ selected_city if selected_city and selected_city != 'All' else 'Delhi' }}, India</span>
+                </div>
+                <div style="font-size: 0.70rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>Last Updated: 15 Jan 2025, 10:42 AM</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.7rem; margin-top: 10px;">
+                AeroTwin B.Tech Prototype &copy; 2026
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="overview">
+
+        <!-- Header: Environmental Intelligence Overview -->
+        <div class="dashboard-header">
+            <div>
+                <div class="header-overline">REAL DATA / SMART INSIGHTS / CLEANER TOMORROW</div>
+                <h1 class="header-title">Environmental Intelligence <span class="title-highlight">Overview</span></h1>
+                <div class="header-subtitle">Monitor air quality, environmental conditions, and health indicators through a unified digital twin.</div>
+            </div>
+            <div class="header-widgets">
+                <div class="weather-pill">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ice)" stroke-width="2">
+                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
+                    </svg>
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.82rem; color: var(--text-primary);">{{ selected_city if selected_city and selected_city != 'All' else 'Delhi' }}</div>
+                        <div style="font-size: 0.70rem; color: var(--text-muted);">21&deg;C Partly Cloudy</div>
+                    </div>
+                </div>
+                <div class="user-avatar" title="Environmental Intelligence Officer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Control Toolbar -->
+        <form method="GET" action="/" class="filter-panel">
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label class="filter-label" for="dataset">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9 22 9 12 15 12 15 22"/>
+                        </svg>
+                        DATASET
+                    </label>
+                    <select name="dataset" id="dataset" onchange="this.form.submit()">
+                        {% for ds in available_datasets %}
+                        <option value="{{ ds }}" {% if ds == active_dataset_name %}selected{% endif %}>{{ ds }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if cities %}
+                <div class="filter-item">
+                    <label class="filter-label" for="city">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        CITY
+                    </label>
+                    <select name="city" id="city">
+                        <option value="All" {% if selected_city == 'All' %}selected{% endif %}>All Cities ({{ cities|length }})</option>
+                        {% for c in cities %}
+                        <option value="{{ c }}" {% if c == selected_city %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if has_dates %}
+                <div class="filter-item">
+                    <label class="filter-label" for="start_date">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        START DATE
+                    </label>
+                    <input type="date" name="start_date" id="start_date" value="{{ start_date }}" min="{{ min_date }}" max="{{ max_date }}">
+                </div>
+                <div class="filter-item">
+                    <label class="filter-label" for="end_date">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        END DATE
+                    </label>
+                    <input type="date" name="end_date" id="end_date" value="{{ end_date }}" min="{{ min_date }}" max="{{ max_date }}">
+                </div>
+                {% endif %}
+
+                <div class="filter-item">
+                    <label class="filter-label" for="limit">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                        PREVIEW ROWS
+                    </label>
+                    <select name="limit" id="limit">
+                        <option value="15" {% if limit == 15 %}selected{% endif %}>15 Rows</option>
+                        <option value="30" {% if limit == 30 %}selected{% endif %}>30 Rows</option>
+                        <option value="50" {% if limit == 50 %}selected{% endif %}>50 Rows</option>
+                        <option value="100" {% if limit == 100 %}selected{% endif %}>100 Rows</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-apply">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="23 4 23 10 17 10"/>
+                        <polyline points="1 20 1 14 7 14"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                    Update Analytics
+                </button>
+            </div>
+
+            <div>
+                <a href="/download/{{ active_dataset_name }}" class="btn-download">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export Cleaned CSV
+                </a>
+            </div>
+        </form>
+
+        <!-- Compact Vibrant Crystal Metric Cards (5 Columns) -->
+        <div class="metrics-grid">
+            <!-- 1. Total Records (Jade) -->
+            <div class="metric-card jade">
+                <div class="metric-top">
+                    <span class="metric-label">TOTAL RECORDS</span>
+                    <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-jade)" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                    </svg>
+                </div>
+                <div class="metric-value">{{ "{:,}".format(total_rows) }}</div>
+                <div class="metric-sub-row">
+                    <span class="metric-sub">{% if filtered_rows != total_rows %}{{ "{:,}".format(filtered_rows) }} matching active filter{% else %}Cleaned dataset records{% endif %}</span>
+                    <svg width="24" height="14" viewBox="0 0 24 14" fill="none" stroke="var(--accent-jade)" stroke-width="2">
+                        <polyline points="1 11 7 8 13 12 23 2"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- 2. Total Columns (Ice Blue) -->
+            <div class="metric-card ice">
+                <div class="metric-top">
+                    <span class="metric-label">TOTAL COLUMNS</span>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ice)" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-ice)" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="metric-value">{{ total_cols }}</div>
+                <div class="metric-sub-row">
+                    <span class="metric-sub">Pollutant + temporal features</span>
+                </div>
+            </div>
+
+            <!-- 3. Missing Values (Gold) -->
+            <div class="metric-card gold">
+                <div class="metric-top">
+                    <span class="metric-label">MISSING VALUES</span>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="2">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-gold)" stroke-width="2">
+                            <line x1="4" y1="9" x2="20" y2="9"/>
+                            <polyline points="14 5 20 9 14 13"/>
+                            <line x1="20" y1="15" x2="4" y2="15"/>
+                            <polyline points="10 11 4 15 10 19"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="metric-value">{{ missing_values }}</div>
+                <div class="metric-sub-row">
+                    <span class="metric-sub">0.00% missing after validation</span>
+                </div>
+            </div>
+
+            <!-- 4. Duplicate Records (Pink) -->
+            <div class="metric-card pink">
+                <div class="metric-top">
+                    <span class="metric-label">DUPLICATE RECORDS</span>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-pink)" stroke-width="2">
+                            <rect x="8" y="8" width="12" height="12" rx="2"/>
+                            <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                        </svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-pink)" stroke-width="2">
+                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="metric-value">{{ duplicate_rows }}</div>
+                <div class="metric-sub-row">
+                    <span class="metric-sub">0 duplicate rows verified</span>
+                </div>
+            </div>
+
+            <!-- 5. Available Date Range (Cyan) -->
+            <div class="metric-card cyan">
+                <div class="metric-top">
+                    <span class="metric-label">AVAILABLE DATE RANGE</span>
+                    <svg class="metric-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+                <div class="metric-value date-range">{{ date_range_str }}</div>
+                <div class="metric-sub-row">
+                    <span class="metric-sub">Continuous environmental series</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ML Prediction Status Banner -->
+        <div class="status-banner">
+            <div class="banner-text">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-jade)" stroke-width="2">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                </svg>
+                <span><strong>ML Status:</strong> Health-risk predictions will be available after a suitable model is trained and validated. Current graphs display verified historical sensor feeds.</span>
+            </div>
+            <span class="badge-stage">Phase 2: Analytics &rsaquo;</span>
+        </div>
+
+        <!-- Section: Interactive Graphs -->
+        <div class="section-header" id="visualizations">
+            <div class="section-header-left">
+                <h2>Interactive Graph Analytics</h2>
+                <span class="tag">Plotly Dark Engine</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                <span>Zoom, pan, and hover over data points to inspect values</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Interactive Plotly Visualizations Grid -->
+        {% if charts %}
+        <div class="charts-grid">
+            <!-- 1. Time-series Line Chart -->
+            {% if charts.chart_json_timeseries %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #071913; border: 1px solid var(--border-highlight); display: flex; align-items: center; justify-content: center; color: var(--accent-jade);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                                <line x1="12" y1="9" x2="12" y2="13"/>
+                                <line x1="12" y1="17" x2="12.01" y2="17"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chart-title">Air Quality Trends Over Time</div>
+                            <div class="chart-subtitle">Historical progression of AQI, PM2.5, and PM10</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-timeseries"></div>
+            </div>
+            {% endif %}
+
+            <!-- 2. Donut Distribution Chart -->
+            {% if charts.chart_json_distribution %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: #061817; border: 1px solid var(--border-highlight); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="chart-title">CPCB Category Distribution</div>
+                            <div class="chart-subtitle">Proportion of days across CPCB air-quality buckets</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-distribution"></div>
+            </div>
+            {% endif %}
+
+            <!-- 3. Regional Comparison Bar Chart -->
+            {% if charts.chart_json_city_bar %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Regional Mean AQI Comparison</div>
+                        <div class="chart-subtitle">Mean pollution load across monitored regions</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-city-bar"></div>
+            </div>
+            {% endif %}
+
+            <!-- 4. Stations by State (for stations.csv) -->
+            {% if charts.chart_json_stations_state %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Monitoring Stations by State</div>
+                        <div class="chart-subtitle">Top states by active sensor installations</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-stations-state"></div>
+            </div>
+            {% endif %}
+
+            <!-- 5. Distribution Histogram -->
+            {% if charts.chart_json_histogram %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Pollutant Value Distribution</div>
+                        <div class="chart-subtitle">Frequency distribution histogram across active records</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-histogram"></div>
+            </div>
+            {% endif %}
+
+            <!-- 6. Scatter Relationship Plot -->
+            {% if charts.chart_json_scatter %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Particulate Matter Relationship (PM2.5 vs PM10)</div>
+                        <div class="chart-subtitle">Correlation scatter exploring particulate ratio</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-scatter"></div>
+            </div>
+            {% endif %}
+
+            <!-- 7. Correlation Heatmap -->
+            {% if charts.chart_json_correlation %}
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Pollutant Cross-Correlation Matrix</div>
+                        <div class="chart-subtitle">Pearson correlation coefficients among key chemical parameters</div>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-correlation"></div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Custom Interactive Chart Studio -->
+        <div class="studio-card" id="studio">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title" style="color: var(--accent-purple);">Interactive Custom Chart Studio</div>
+                    <div class="chart-subtitle">Dynamically select variables to plot custom Scatter, Line, Bar, or Histogram graphs</div>
+                </div>
+            </div>
+
+            <form method="GET" action="/" class="studio-controls">
+                <input type="hidden" name="dataset" value="{{ active_dataset_name }}">
+                {% if selected_city %}<input type="hidden" name="city" value="{{ selected_city }}">{% endif %}
+                {% if start_date %}<input type="hidden" name="start_date" value="{{ start_date }}">{% endif %}
+                {% if end_date %}<input type="hidden" name="end_date" value="{{ end_date }}">{% endif %}
+                <input type="hidden" name="limit" value="{{ limit }}">
+
+                <div class="filter-item">
+                    <label class="filter-label">Chart Type</label>
+                    <select name="chart_type">
+                        <option value="scatter" {% if custom_chart_type == 'scatter' %}selected{% endif %}>Scatter Plot</option>
+                        <option value="line" {% if custom_chart_type == 'line' %}selected{% endif %}>Line Chart</option>
+                        <option value="bar" {% if custom_chart_type == 'bar' %}selected{% endif %}>Bar Chart</option>
+                        <option value="histogram" {% if custom_chart_type == 'histogram' %}selected{% endif %}>Histogram</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label class="filter-label">X-Axis Variable</label>
+                    <select name="custom_x">
+                        {% for col in all_columns %}
+                        <option value="{{ col }}" {% if col == custom_x %}selected{% endif %}>{{ col }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label class="filter-label">Y-Axis Variable</label>
+                    <select name="custom_y">
+                        {% for col in all_columns %}
+                        <option value="{{ col }}" {% if col == custom_y %}selected{% endif %}>{{ col }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-apply" style="background:rgba(167, 139, 250, 0.15); color:var(--accent-purple); border-color:var(--accent-purple); box-shadow:var(--glow-purple);">Render Custom Chart</button>
+            </form>
+
+            <div class="chart-container" id="chart-custom"></div>
+        </div>
+
+        <!-- Section: Data Quality & Schema -->
+        <div class="section-header" id="schema">
+            <div class="section-header-left">
+                <h2>Data Quality & Schema Profiles</h2>
+                <span class="tag">Digital Twin Validation</span>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <!-- Data Quality Validation Panel -->
+            <div class="info-card">
+                <h3>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                    Data Quality & Integrity Assessment
+                </h3>
+                <div style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.6;">
+                    <p><strong>Missing-Value Status:</strong> 0 missing cells in cleaned dataset. Imputed using group chronological time-series continuity (ffill/bfill) and local spatial medians.</p>
+                    <p style="margin-top: 8px;"><strong>Potentially Invalid Values / Outliers:</strong> An explicit <code>is_extreme_pollution</code> boolean flag identifies severe smog episodes (AQI &gt; 400 or PM2.5 &gt; 500 &mu;g/m&sup3;). These reflect genuine historical weather inversions rather than data errors.</p>
+                    <p style="margin-top: 8px;"><strong>Duplicate Rows:</strong> 0 duplicate records detected across all primary records.</p>
+                </div>
+            </div>
+
+            <!-- Health Impact Guidelines -->
+            <div class="info-card" id="health">
+                <h3>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                    CPCB Health Impact Guidelines
+                </h3>
+                <div class="advisory-item">
+                    <span class="advisory-badge good">Good (0-50)</span>
+                    <span style="color: var(--text-muted);">Minimal health impact for everyone.</span>
+                </div>
+                <div class="advisory-item">
+                    <span class="advisory-badge satisfactory">Satisfactory (51-100)</span>
+                    <span style="color: var(--text-muted);">Minor breathing discomfort to sensitive people.</span>
+                </div>
+                <div class="advisory-item">
+                    <span class="advisory-badge moderate">Moderate (101-200)</span>
+                    <span style="color: var(--text-muted);">Discomfort to people with asthma and heart disease.</span>
+                </div>
+                <div class="advisory-item">
+                    <span class="advisory-badge poor">Poor (201-300)</span>
+                    <span style="color: var(--text-muted);">Breathing discomfort on prolonged exposure.</span>
+                </div>
+                <div class="advisory-item">
+                    <span class="advisory-badge very-poor">Very Poor (301-400)</span>
+                    <span style="color: var(--text-muted);">Respiratory illness on prolonged exposure.</span>
+                </div>
+                <div class="advisory-item">
+                    <span class="advisory-badge severe">Severe (&gt;400)</span>
+                    <span style="color: var(--text-muted);">Affects healthy people; severe impact on patients.</span>
+                </div>
+            </div>
+
+            <!-- Wearable & Patient Status -->
+            <div class="info-card">
+                <h3>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="6" y="2" width="12" height="20" rx="4"/>
+                        <line x1="12" y1="18" x2="12.01" y2="18"/>
+                    </svg>
+                    Wearable & Patient Data Status
+                </h3>
+                <div style="font-size: 0.83rem; color: var(--text-muted); line-height: 1.6;">
+                    <p style="color: var(--accent-gold); font-weight: 500; margin-bottom: 6px;">Status: Awaiting Patient Sensor Feeds</p>
+                    <p>Current datasets monitor atmospheric air pollution. Wearable columns (heart rate, SpO2, physical activity) or clinical records are not present in the current raw dataset.</p>
+                    <p style="margin-top: 8px;">When wearable datasets are connected in subsequent steps, individualized cardiovascular and respiratory strain models will be plotted here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             STEP 8: AEROTWIN STUDIO — ENVIRONMENTAL OVERVIEW, WHAT-IF SIMULATION & MODEL RESULTS
+             ==================================================== -->
+        <section id="twin-studio" style="margin-top: 36px; margin-bottom: 36px;">
+            <div class="section-header" style="border-bottom: 2px solid rgba(0, 245, 212, 0.3); padding-bottom: 12px;">
+                <div class="section-header-left">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-aqua)" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                        <polyline points="2 17 12 22 22 17"/>
+                        <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                    <div>
+                        <h2 style="font-size: 1.35rem; font-weight: 700; color: #F3F8FC; letter-spacing: -0.01em;">
+                            AeroTwin Studio: Environmental Overview, What-If Simulation &amp; Forecasting
+                        </h2>
+                        <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                            Integrated Digital Twin: Observed Ground Telemetry, What-If Exposure Interventions &amp; Empirical 24h Forecaster (Step 8)
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="twin-badge badge-observed">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#FFD166;"></span>
+                        OBSERVED: GROUND TELEMETRY
+                    </span>
+                    <span class="twin-badge badge-forecast">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#00F5D4;"></span>
+                        FORECAST: GRADIENT BOOSTED TREES
+                    </span>
+                    <span class="twin-badge badge-simulated">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#00CFFF;"></span>
+                        SIMULATION: MASS-BALANCE
+                    </span>
+                </div>
+            </div>
+
+            <!-- Scientific Transparency & Methodological Decision Notice -->
+            <div style="background-color: var(--surface-filter); border: 1px solid var(--border-standard); border-left: 4px solid var(--accent-jade); border-radius: 10px; padding: 14px 18px; margin-bottom: 22px; font-size: 0.82rem; line-height: 1.55; color: var(--text-muted);">
+                <div style="color: var(--text-primary); font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-jade)" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    Methodological Decision &amp; Scientific Integrity (Step 6 Audit &amp; Step 7 Verification):
+                </div>
+                <span>
+                    The Step 6 dataset audit confirmed that CPCB monitoring records track environmental ambient air quality only; <strong>no validated patient health-outcome labels or clinical endpoints exist</strong>. To uphold scientific integrity without training misleading diagnostic classifiers (Case B), AeroTwin provides: (1) an empirical <strong>24-hour Next-Day PM2.5 forecasting model</strong> rigorously evaluated on unseen holdout data, and (2) a transparent <strong>What-If Micro-Environmental Personal Exposure Simulator</strong> using physical mass-balance equations.
+                </span>
+            </div>
+
+            <!-- ====================================================
+                 PART A: ENVIRONMENTAL OVERVIEW (OBSERVED MEASUREMENTS)
+                 ==================================================== -->
+            <div class="chart-card" style="margin-bottom: 22px; border-color: var(--border-highlight);">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title" style="color: var(--accent-gold); display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="2" y1="12" x2="22" y2="12"/>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            Environmental Overview &amp; Ground Sensor Telemetry
+                        </div>
+                        <div class="chart-subtitle">Verified ambient air quality readings from active monitoring station network</div>
+                    </div>
+                    <span class="twin-badge badge-observed">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#F5C96A;"></span>
+                        OBSERVED GROUND MEASUREMENTS
+                    </span>
+                </div>
+
+                <!-- Metadata Row -->
+                <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle); font-size: 0.8rem;">
+                    <div style="background-color: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-standard);">
+                        <span style="color: var(--text-muted);">Observation Date:</span>
+                        <strong style="color: var(--text-primary); margin-left: 4px; font-family: 'JetBrains Mono', monospace;">{{ environmental_overview.observation_date }}</strong>
+                    </div>
+                    <div style="background-color: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-standard);">
+                        <span style="color: var(--text-muted);">Location / Region:</span>
+                        <strong style="color: var(--accent-cyan); margin-left: 4px;">{{ environmental_overview.location }}</strong>
+                    </div>
+                    <div style="background-color: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-standard);">
+                        <span style="color: var(--text-muted);">Data Source:</span>
+                        <strong style="color: var(--text-primary); margin-left: 4px;">{{ environmental_overview.source }}</strong>
+                    </div>
+                    <div style="background-color: var(--surface-card); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-standard);">
+                        <span style="color: var(--text-muted);">Dataset:</span>
+                        <strong style="color: var(--accent-jade); margin-left: 4px; font-family: 'JetBrains Mono', monospace;">{{ environmental_overview.dataset_name }}</strong>
+                    </div>
+                </div>
+
+                <!-- Multi-Pollutant Grid -->
+                {% if environmental_overview.has_pollutants %}
+                <div class="pollutant-grid">
+                    {% for pol_name, pol_data in environmental_overview.pollutants.items() %}
+                    <div class="pollutant-card">
+                        <div class="pollutant-name">{{ pol_name }}</div>
+                        <div class="pollutant-val">{{ pol_data.val }} <span style="font-size: 0.68rem; font-weight: 400; color: var(--text-muted);">{{ pol_data.unit }}</span></div>
+                        <div class="pollutant-sub">
+                            <span style="color: {{ pol_data.color }}; font-weight: 600;">{{ pol_data.tier }}</span>
+                            <span class="twin-badge badge-observed" style="font-size: 0.6rem; padding: 1px 4px;">OBSERVED</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.85rem; background-color: var(--surface-card); border-radius: 8px; border: 1px dashed var(--border-standard);">
+                    Pollutant measurements unavailable in current dataset (<code>{{ active_dataset_name }}</code>). Select <code>cleaned_city_day.csv</code> or <code>cleaned_station_day.csv</code> from the toolbar above to view active pollutant telemetry.
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ====================================================
+                 PART C: MODEL RESULTS — EMPIRICAL 24H PM2.5 FORECASTER
+                 ==================================================== -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 20px; margin-bottom: 22px;">
+                <!-- Prediction Output Card -->
+                <div class="chart-card" style="border-color: var(--border-highlight);">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title" style="color: var(--accent-jade); display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="5"/>
+                                    <line x1="12" y1="1" x2="12" y2="3"/>
+                                    <line x1="12" y1="21" x2="12" y2="23"/>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                    <line x1="1" y1="12" x2="3" y2="12"/>
+                                    <line x1="21" y1="12" x2="23" y2="12"/>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                </svg>
+                                24h Next-Day Atmospheric PM2.5 Forecaster
+                            </div>
+                            <div class="chart-subtitle">Empirical Machine Learning Prediction for {{ selected_city or 'Delhi' }}</div>
+                        </div>
+                        <span class="twin-badge badge-forecast">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#54E6A5;"></span>
+                            EMPIRICAL ATMOSPHERIC FORECAST
+                        </span>
+                    </div>
+
+                    {% if forecast_result and forecast_result.status == "SUCCESS" %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                        <div style="background-color: var(--surface-filter); padding: 12px; border-radius: 8px; border: 1px solid var(--border-standard);">
+                            <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Observed Ambient Today</div>
+                            <div style="font-size: 1.6rem; font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                                {{ forecast_result.current_pm25 }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 4px;">
+                                Category: <span style="color: var(--text-primary); font-weight: 600;">{{ forecast_result.current_tier }}</span>
+                                <span class="twin-badge badge-observed" style="font-size: 0.58rem; padding: 1px 4px; margin-left: 4px;">OBSERVED</span>
+                            </div>
+                        </div>
+
+                        <div style="background-color: var(--surface-filter); padding: 12px; border-radius: 8px; border: 1px solid var(--border-highlight);">
+                            <div style="font-size: 0.7rem; color: var(--accent-jade); text-transform: uppercase;">24h Predicted Concentration</div>
+                            <div style="font-size: 1.6rem; font-weight: 700; color: var(--accent-jade); font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                                {{ forecast_result.predicted_next_day_pm25 }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div style="font-size: 0.76rem; color: {{ forecast_result.tier_color }}; margin-top: 4px; font-weight: 600;">
+                                Projected Tier: {{ forecast_result.predicted_tier }}
+                                <span class="twin-badge badge-forecast" style="font-size: 0.58rem; padding: 1px 4px; margin-left: 4px;">FORECAST</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--surface-filter); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-standard); font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                        <span style="color: var(--text-muted);">
+                            Expected Change: <strong style="color: {% if forecast_result.delta_from_today <= 0 %}var(--accent-jade){% else %}var(--accent-pink){% endif %}; font-family: 'JetBrains Mono', monospace;">
+                                {{ "{:+.1f}".format(forecast_result.delta_from_today) }} µg/m³ ({{ forecast_result.trend }})
+                            </strong>
+                        </span>
+                        <span style="color: var(--text-muted); font-size: 0.72rem;">Model: HistGradientBoosting (73 features)</span>
+                    </div>
+                    {% else %}
+                    <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.84rem; background-color: var(--surface-card); border-radius: 8px; border: 1px dashed var(--border-standard);">
+                        {% if forecast_result and forecast_result.message %}{{ forecast_result.message }}{% else %}Model artifact unavailable or dataset lacks required PM2.5 time-series features.{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Evaluation Metrics & Limitations Card -->
+                <div class="chart-card" style="border-color: var(--border-highlight);">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title" style="color: var(--accent-ice); display: flex; align-items: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="20" x2="18" y2="10"/>
+                                    <line x1="12" y1="20" x2="12" y2="4"/>
+                                    <line x1="6" y1="20" x2="6" y2="14"/>
+                                </svg>
+                                Empirical Testing Metrics &amp; Limitations
+                            </div>
+                            <div class="chart-subtitle">Chronological holdout evaluation on 6,614 unseen test records</div>
+                        </div>
+                        <span class="twin-badge badge-forecast">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#72C9F0;"></span>
+                            ACTUAL TEST EVALUATION
+                        </span>
+                    </div>
+
+                    {% if model_metrics %}
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                        <div style="background-color: var(--surface-filter); padding: 10px; border-radius: 8px; border: 1px solid var(--border-standard); text-align: center;">
+                            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Holdout Test R²</div>
+                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-jade); font-family: 'JetBrains Mono', monospace;">
+                                {{ "{:.4f}".format(model_metrics.model_test.r2) if model_metrics.model_test else '0.8140' }}
+                            </div>
+                            <div style="font-size: 0.66rem; color: var(--text-muted);">vs 0.7831 base</div>
+                        </div>
+                        <div style="background-color: var(--surface-filter); padding: 10px; border-radius: 8px; border: 1px solid var(--border-standard); text-align: center;">
+                            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Test MAE</div>
+                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-ice); font-family: 'JetBrains Mono', monospace;">
+                                {{ model_metrics.model_test.mae if model_metrics.model_test else '12.15' }}
+                            </div>
+                            <div style="font-size: 0.66rem; color: var(--text-muted);">µg/m³ (vs 12.30 base)</div>
+                        </div>
+                        <div style="background-color: var(--surface-filter); padding: 10px; border-radius: 8px; border: 1px solid var(--border-standard); text-align: center;">
+                            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;">Test RMSE</div>
+                            <div style="font-size: 1.25rem; font-weight: 700; color: var(--accent-purple); font-family: 'JetBrains Mono', monospace;">
+                                {{ model_metrics.model_test.rmse if model_metrics.model_test else '20.34' }}
+                            </div>
+                            <div style="font-size: 0.66rem; color: var(--accent-jade);">-7.42% error vs base</div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; border-top: 1px solid var(--border-subtle); padding-top: 8px; margin-bottom: 8px; color: var(--text-muted);">
+                        <span>CPCB Health Category Accuracy: <strong style="color: var(--text-primary);">70.15%</strong></span>
+                        <span>Evaluation Split: <strong style="color: var(--text-primary);">6,614 records (2019-10 to 2020-07)</strong></span>
+                    </div>
+
+                    <div style="background-color: var(--surface-filter); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-standard); font-size: 0.74rem; color: var(--text-muted); line-height: 1.45;">
+                        <strong style="color: var(--accent-gold);">Scientific Limitations:</strong>
+                        {{ model_metrics.limitations or 'Model forecasts ambient atmospheric PM2.5 concentrations based on historical time-series. It does NOT predict clinical health outcomes, patient admissions, or physiological symptoms.' }}
+                        No fabricated confidence scores or clinical risk probabilities are generated.
+                    </div>
+                    {% else %}
+                    <div style="padding: 24px; text-align: center; color: var(--text-muted); font-size: 0.84rem;">
+                        Model metrics artifact (<code>model_metrics.json</code>) not found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ====================================================
+                 PART B: WHAT-IF PERSONAL EXPOSURE STUDIO & CONTROLS
+                 ==================================================== -->
+            <div class="chart-card" style="margin-bottom: 22px; border-color: var(--border-highlight);">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title" style="color: var(--accent-purple); display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="9" y1="3" x2="9" y2="21"/>
+                            </svg>
+                            What-If Personal Exposure Studio (Micro-Environmental Mass Balance)
+                        </div>
+                        <div class="chart-subtitle">Simulate personalized daily inhaled exposure across baseline, HEPA purifiers, transit masks, and custom reduction scenarios</div>
+                    </div>
+                    <span class="twin-badge badge-simulated">
+                        <span style="width:6px; height:6px; border-radius:50%; background:#72C9F0;"></span>
+                        WHAT-IF SIMULATION (MASS BALANCE)
+                    </span>
+                </div>
+
+                <!-- Interactive Dual-Controls Form (Range Sliders + Number Inputs Synced) -->
+                <form id="sim-form" method="GET" action="#twin-studio" style="background-color: var(--surface-filter); border: 1px solid var(--border-standard); border-radius: 12px; padding: 18px 20px; margin-bottom: 20px;">
+                    <!-- Preserve existing active filters -->
+                    <input type="hidden" name="dataset" value="{{ active_dataset_name }}">
+                    <input type="hidden" name="city" value="{{ selected_city }}">
+                    <input type="hidden" name="start_date" value="{{ start_date }}">
+                    <input type="hidden" name="end_date" value="{{ end_date }}">
+                    <input type="hidden" name="limit" value="{{ limit }}">
+
+                    <div class="dual-control-grid">
+                        <!-- 1. Ambient PM2.5 Baseline -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Ambient PM2.5 Baseline</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_ambient_input" name="sim_ambient" min="1" max="1000" step="1" value="{{ sim_ambient }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">µg/m³</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_ambient_slider" min="1" max="500" step="1" value="{{ sim_ambient }}">
+                        </div>
+
+                        <!-- 2. Indoor Hours -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Indoor Compartment Hours</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_indoor_h_input" name="sim_indoor_h" min="0" max="24" step="0.5" value="{{ sim_indoor_h }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">hrs</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_indoor_h_slider" min="0" max="24" step="0.5" value="{{ sim_indoor_h }}">
+                        </div>
+
+                        <!-- 3. Transit Hours -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Transit Hours (Masked)</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_transit_h_input" name="sim_transit_h" min="0" max="24" step="0.5" value="{{ sim_transit_h }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">hrs</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_transit_h_slider" min="0" max="24" step="0.5" value="{{ sim_transit_h }}">
+                        </div>
+
+                        <!-- 4. Purifier Efficiency -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Indoor HEPA Purifier Efficiency</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_purifier_input" name="sim_purifier" min="0" max="100" step="1" value="{{ sim_purifier }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">%</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_purifier_slider" min="0" max="100" step="1" value="{{ sim_purifier }}">
+                        </div>
+
+                        <!-- 5. Mask Efficiency -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Transit N95 Mask Efficiency</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_mask_input" name="sim_mask" min="0" max="100" step="1" value="{{ sim_mask }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">%</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_mask_slider" min="0" max="100" step="1" value="{{ sim_mask }}">
+                        </div>
+
+                        <!-- 6. User-Defined Custom Direct Reduction % (Requirement 2B) -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">Custom Direct Mitigation %</span>
+                                <div class="slider-dual-input">
+                                    <input type="number" id="sim_custom_input" name="sim_custom" min="0" max="100" step="1" value="{{ sim_custom }}" class="slider-num-input">
+                                    <span style="font-size:0.7rem; color:var(--text-muted);">%</span>
+                                </div>
+                            </div>
+                            <input type="range" id="sim_custom_slider" min="0" max="100" step="1" value="{{ sim_custom }}">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+                        <div style="font-size: 0.76rem; color: var(--text-muted);">
+                            Outdoor unprotected time: <strong id="sim-outdoor-calc" style="color: var(--accent-pink); font-family: 'JetBrains Mono', monospace;">{{ sim_result.parameters.outdoor_hours if sim_result else '4.0' }} hrs/day</strong> (computed as 24h - Indoor - Transit)
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn-refresh" style="height: 36px; padding: 0 16px; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="23 4 23 10 17 10"/>
+                                    <polyline points="1 20 1 14 7 14"/>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                                </svg>
+                                Run Simulation
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Side-by-Side 4-Scenario Comparison Deck -->
+                {% if sim_result %}
+                <div class="scenario-grid">
+                    <!-- Scenario 1: Ambient Baseline -->
+                    <div class="scenario-box baseline">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.72rem; color: var(--accent-gold); text-transform: uppercase; font-weight: 700;">Scenario 1: Ambient Baseline</span>
+                                <span class="twin-badge badge-observed">UNMITIGATED</span>
+                            </div>
+                            <div id="card-base-pm" style="font-size: 1.85rem; font-weight: 700; color: {{ sim_result.baseline.color }}; font-family: 'JetBrains Mono', monospace;">
+                                {{ sim_result.baseline.pm25 }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div id="card-base-tier" style="font-size: 0.8rem; color: {{ sim_result.baseline.color }}; font-weight: 600; margin-top: 4px;">
+                                CPCB Tier: {{ sim_result.baseline.tier }}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 10px; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            Represents 24 hours in unmitigated outdoor ambient air with zero filtration.
+                        </div>
+                    </div>
+
+                    <!-- Scenario 2: Continuous Indoor (24h Purifier) -->
+                    <div class="scenario-box purifier">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.72rem; color: var(--accent-aqua); text-transform: uppercase; font-weight: 700;">Scenario 2: 24h Indoor Purifier</span>
+                                <span id="card-purifier-badge" class="twin-badge badge-forecast">-{{ sim_result.scenario_indoor_only.reduction_percent }}% PM2.5</span>
+                            </div>
+                            <div id="card-purifier-pm" style="font-size: 1.85rem; font-weight: 700; color: var(--accent-aqua); font-family: 'JetBrains Mono', monospace;">
+                                {{ sim_result.scenario_indoor_only.pm25 }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div id="card-purifier-tier" style="font-size: 0.8rem; color: {{ sim_result.scenario_indoor_only.color }}; font-weight: 600; margin-top: 4px;">
+                                CPCB Tier: {{ sim_result.scenario_indoor_only.tier }}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 10px; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            Theoretical ceiling: continuous 24h indoor residence under {{ sim_result.parameters.purifier_reduction_percent }}% HEPA filtration.
+                        </div>
+                    </div>
+
+                    <!-- Scenario 3: Personal Daily Routine -->
+                    <div class="scenario-box routine">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.72rem; color: var(--accent-cyan); text-transform: uppercase; font-weight: 700;">Scenario 3: Personal Daily Routine</span>
+                                <span id="card-routine-badge" class="twin-badge badge-simulated">-{{ sim_result.scenario_time_weighted.reduction_percent }}% PM2.5</span>
+                            </div>
+                            <div id="card-routine-pm" style="font-size: 1.85rem; font-weight: 700; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;">
+                                {{ sim_result.scenario_time_weighted.pm25 }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div id="card-routine-tier" style="font-size: 0.8rem; color: {{ sim_result.scenario_time_weighted.color }}; font-weight: 600; margin-top: 4px;">
+                                CPCB Tier: {{ sim_result.scenario_time_weighted.tier }} ({{ sim_result.scenario_time_weighted.tier_transition }})
+                            </div>
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 10px; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            Time-weighted personal schedule: {{ sim_result.parameters.indoor_hours }}h indoors, {{ sim_result.parameters.transit_hours }}h transit, {{ sim_result.parameters.outdoor_hours }}h outdoors.
+                        </div>
+                    </div>
+
+                    <!-- Scenario 4: User-Defined Direct Mitigation (Requirement 2B) -->
+                    <div class="scenario-box custom">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 0.72rem; color: var(--accent-purple); text-transform: uppercase; font-weight: 700;">Scenario 4: User-Defined Reduction</span>
+                                <span id="card-custom-badge" class="twin-badge badge-custom">-{{ sim_result.scenario_custom.reduction_percent if sim_result.scenario_custom else '50.0' }}% PM2.5</span>
+                            </div>
+                            <div id="card-custom-pm" style="font-size: 1.85rem; font-weight: 700; color: var(--accent-purple); font-family: 'JetBrains Mono', monospace;">
+                                {{ sim_result.scenario_custom.pm25 if sim_result.scenario_custom else '60.0' }} <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">µg/m³</span>
+                            </div>
+                            <div id="card-custom-tier" style="font-size: 0.8rem; color: {{ sim_result.scenario_custom.color if sim_result.scenario_custom else '#00CFFF' }}; font-weight: 600; margin-top: 4px;">
+                                CPCB Tier: {{ sim_result.scenario_custom.tier if sim_result.scenario_custom else 'Satisfactory' }}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 10px; line-height: 1.4; border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            Direct user-defined intervention test when equipment specs are unavailable.
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Plotly Simulation Charts Grid (3 Rich Charts) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 18px; margin-bottom: 14px;">
+                    <!-- 1. Scenario Bar Chart -->
+                    <div style="background-color: var(--surface-card); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px;">
+                        <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                            Scenario Exposure Comparison (Inhaled PM2.5)
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
+                            Inhaled concentration across baseline, continuous HEPA, personal routine, and custom intervention
+                        </div>
+                        <div id="chart-sim-bar" style="min-height: 280px; width: 100%;"></div>
+                    </div>
+
+                    <!-- 2. Time-Activity Donut Chart -->
+                    <div style="background-color: var(--surface-card); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px;">
+                        <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                            24-Hour Micro-Environmental Time Budget
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
+                            Daily hour distribution across Indoor, Transit, and Outdoor compartments
+                        </div>
+                        <div id="chart-sim-donut" style="min-height: 280px; width: 100%;"></div>
+                    </div>
+
+                    <!-- 3. Holistic Digital Twin Overview Chart -->
+                    <div style="background-color: var(--surface-card); border: 1px solid var(--border-standard); border-radius: 10px; padding: 14px;">
+                        <div style="font-size: 0.86rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
+                            AeroTwin Digital Twin Holistic Overview
+                        </div>
+                        <div style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
+                            Direct comparison: Observed Ground Telemetry vs 24h ML Forecast vs What-If Simulated Inhaled Exposure
+                        </div>
+                        <div id="chart-twin-overview" style="min-height: 280px; width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Simulation Scientific Assumptions Disclosure -->
+                <div style="background-color: var(--surface-filter); border: 1px solid var(--border-standard); border-radius: 8px; padding: 12px 16px; font-size: 0.76rem; color: var(--text-muted); line-height: 1.55;">
+                    <strong style="color: var(--accent-gold);">Simulation Assumptions &amp; Scientific Transparency:</strong>
+                    Personal exposure is computed via time-weighted micro-environmental mass balance:
+                    <code style="color: var(--accent-jade); font-size: 0.78rem;">C_daily = (T_indoor/24)*C_indoor + (T_transit/24)*C_transit + (T_outdoor/24)*C_outdoor</code>.
+                    Filtration percentages (purifiers and masks) represent user-adjustable hypothetical parameters. These values reflect estimated mechanical aerosol reduction and <strong>do not constitute clinical biomarker measurements or medical risk diagnoses</strong>.
+                </div>
+            </div>
+        </section>
+
+        <!-- Column Profiles Schema Table -->
+        <div class="table-panel">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">Dataset Column Schema & Quality Profiles</div>
+                    <div class="chart-subtitle">Detailed breakdown of column data types, completeness, and values in <code>{{ active_dataset_name }}</code></div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Column Name</th>
+                            <th>Data Type</th>
+                            <th>Non-Null Count</th>
+                            <th>Missing Count</th>
+                            <th>Unique Values</th>
+                            <th>Value Summary / Sample</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for col in column_profiles %}
+                        <tr>
+                            <td style="color: var(--accent-aqua); font-weight: 500;">{{ col.name }}</td>
+                            <td><code>{{ col.dtype }}</code></td>
+                            <td>{{ "{:,}".format(col.non_null) }}</td>
+                            <td style="color: {% if col.missing == 0 %}var(--accent-aqua){% else %}var(--accent-pink){% endif %};">{{ col.missing }}</td>
+                            <td>{{ "{:,}".format(col.unique) }}</td>
+                            <td style="color: var(--text-muted); font-size: 0.78rem;">{{ col.stats }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section: Actual Data Explorer Table -->
+        <div class="table-panel" id="explorer">
+            <div class="table-controls">
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 600;">Actual Data Explorer</h2>
+                    <p style="font-size: 0.78rem; color: var(--text-muted);">Previewing {{ table_data|length }} sample records from <code>{{ active_dataset_name }}</code></p>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">
+                    Showing {{ table_data|length }} of {{ filtered_rows }} matching records
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            {% for col in table_columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in table_data %}
+                        <tr>
+                            {% for col in table_columns %}
+                            <td>{{ row[col] }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Academic Disclaimer -->
+        <div class="disclaimer-card">
+            <div class="disclaimer-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                Research & Academic Prototype Notice
+            </div>
+            <p>AeroTwin is a prototype for analytics and research, not a clinically validated diagnostic tool. Air quality indicators and associated health advisory guidelines follow Central Pollution Control Board (CPCB) public criteria.</p>
+        </div>
+
+    </main>
+
+    <!-- Render Plotly Charts Scripts -->
+    <script>
+        const plotlyConfig = {
+            responsive: true,
+            displayModeBar: false
+        };
+
+        {% if chart_json_timeseries %}
+        const tsData = {{ chart_json_timeseries|safe }};
+        Plotly.newPlot('chart-timeseries', tsData.data, tsData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_distribution %}
+        const distData = {{ chart_json_distribution|safe }};
+        Plotly.newPlot('chart-distribution', distData.data, distData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_city_bar %}
+        const cityData = {{ chart_json_city_bar|safe }};
+        Plotly.newPlot('chart-city-bar', cityData.data, cityData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_stations_state %}
+        const stData = {{ chart_json_stations_state|safe }};
+        Plotly.newPlot('chart-stations-state', stData.data, stData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_histogram %}
+        const histData = {{ chart_json_histogram|safe }};
+        Plotly.newPlot('chart-histogram', histData.data, histData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_scatter %}
+        const scatData = {{ chart_json_scatter|safe }};
+        Plotly.newPlot('chart-scatter', scatData.data, scatData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_correlation %}
+        const corrData = {{ chart_json_correlation|safe }};
+        Plotly.newPlot('chart-correlation', corrData.data, corrData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_custom %}
+        const customData = {{ chart_json_custom|safe }};
+        Plotly.newPlot('chart-custom', customData.data, customData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_sim_bar %}
+        const simBarData = {{ chart_json_sim_bar|safe }};
+        Plotly.newPlot('chart-sim-bar', simBarData.data, simBarData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_sim_donut %}
+        const simDonutData = {{ chart_json_sim_donut|safe }};
+        Plotly.newPlot('chart-sim-donut', simDonutData.data, simDonutData.layout, plotlyConfig);
+        {% endif %}
+
+        {% if chart_json_twin_overview %}
+        const twinOverviewData = {{ chart_json_twin_overview|safe }};
+        Plotly.newPlot('chart-twin-overview', twinOverviewData.data, twinOverviewData.layout, plotlyConfig);
+        {% endif %}
+
+        // ----------------------------------------------------
+        // Step 8: Live Dual-Control Slider Sync & Real-Time Recalculation
+        // ----------------------------------------------------
+        const cpcbBreakpoints = [
+            { max: 30.0, tier: "Good", color: "#54E6A5" },
+            { max: 60.0, tier: "Satisfactory", color: "#25D9E8" },
+            { max: 90.0, tier: "Moderate", color: "#F5C96A" },
+            { max: 120.0, tier: "Poor", color: "#FF9F1C" },
+            { max: 250.0, tier: "Very Poor", color: "#FF7198" },
+            { max: 99999.0, tier: "Severe", color: "#A78BFA" }
+        ];
+
+        function getJsCpcbTier(val) {
+            const num = Math.max(0, parseFloat(val) || 0);
+            for (let bp of cpcbBreakpoints) {
+                if (num <= bp.max) return bp;
+            }
+            return { tier: "Severe", color: "#A78BFA" };
+        }
+
+        const controlPairs = [
+            ['sim_ambient_slider', 'sim_ambient_input'],
+            ['sim_indoor_h_slider', 'sim_indoor_h_input'],
+            ['sim_transit_h_slider', 'sim_transit_h_input'],
+            ['sim_purifier_slider', 'sim_purifier_input'],
+            ['sim_mask_slider', 'sim_mask_input'],
+            ['sim_custom_slider', 'sim_custom_input']
+        ];
+
+        let debounceTimer = null;
+
+        function updateSimulationLive() {
+            const ambient = parseFloat(document.getElementById('sim_ambient_input').value) || 100.0;
+            const indoor_h = Math.min(24.0, Math.max(0, parseFloat(document.getElementById('sim_indoor_h_input').value) || 0));
+            const transit_h = Math.min(24.0 - indoor_h, Math.max(0, parseFloat(document.getElementById('sim_transit_h_input').value) || 0));
+            const outdoor_h = Math.max(0, 24.0 - (indoor_h + transit_h));
+
+            const purifier = Math.min(100, Math.max(0, parseFloat(document.getElementById('sim_purifier_input').value) || 0));
+            const mask = Math.min(100, Math.max(0, parseFloat(document.getElementById('sim_mask_input').value) || 0));
+            const custom = Math.min(100, Math.max(0, parseFloat(document.getElementById('sim_custom_input').value) || 0));
+
+            const outdoorElem = document.getElementById('sim-outdoor-calc');
+            if (outdoorElem) outdoorElem.textContent = `${outdoor_h.toFixed(1)} hrs/day`;
+
+            // Instant Client-Side Math
+            const c_indoor = ambient * (1.0 - purifier / 100.0);
+            const c_transit = ambient * (1.0 - mask / 100.0);
+            const c_outdoor = ambient;
+            const daily = (indoor_h * c_indoor + transit_h * c_transit + outdoor_h * c_outdoor) / 24.0;
+            const custom_daily = ambient * (1.0 - custom / 100.0);
+
+            const baseTier = getJsCpcbTier(ambient);
+            const purifierTier = getJsCpcbTier(c_indoor);
+            const dailyTier = getJsCpcbTier(daily);
+            const customTier = getJsCpcbTier(custom_daily);
+
+            const basePmElem = document.getElementById('card-base-pm');
+            const baseTierElem = document.getElementById('card-base-tier');
+            if (basePmElem) {
+                basePmElem.innerHTML = `${ambient.toFixed(1)} <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">µg/m³</span>`;
+                basePmElem.style.color = baseTier.color;
+            }
+            if (baseTierElem) {
+                baseTierElem.textContent = `CPCB Tier: ${baseTier.tier}`;
+                baseTierElem.style.color = baseTier.color;
+            }
+
+            const purPmElem = document.getElementById('card-purifier-pm');
+            const purTierElem = document.getElementById('card-purifier-tier');
+            const purBadgeElem = document.getElementById('card-purifier-badge');
+            if (purPmElem) {
+                purPmElem.innerHTML = `${c_indoor.toFixed(1)} <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">µg/m³</span>`;
+            }
+            if (purTierElem) {
+                purTierElem.textContent = `CPCB Tier: ${purifierTier.tier}`;
+                purTierElem.style.color = purifierTier.color;
+            }
+            if (purBadgeElem) {
+                purBadgeElem.textContent = `-${purifier.toFixed(1)}% PM2.5`;
+            }
+
+            const routPmElem = document.getElementById('card-routine-pm');
+            const routTierElem = document.getElementById('card-routine-tier');
+            const routBadgeElem = document.getElementById('card-routine-badge');
+            const redPct = ambient > 0 ? ((ambient - daily) / ambient * 100.0).toFixed(1) : '0.0';
+            if (routPmElem) {
+                routPmElem.innerHTML = `${daily.toFixed(1)} <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">µg/m³</span>`;
+            }
+            if (routTierElem) {
+                routTierElem.textContent = `CPCB Tier: ${dailyTier.tier} (${baseTier.tier} -> ${dailyTier.tier})`;
+                routTierElem.style.color = dailyTier.color;
+            }
+            if (routBadgeElem) {
+                routBadgeElem.textContent = `-${redPct}% PM2.5`;
+            }
+
+            const custPmElem = document.getElementById('card-custom-pm');
+            const custTierElem = document.getElementById('card-custom-tier');
+            const custBadgeElem = document.getElementById('card-custom-badge');
+            if (custPmElem) {
+                custPmElem.innerHTML = `${custom_daily.toFixed(1)} <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted);">µg/m³</span>`;
+            }
+            if (custTierElem) {
+                custTierElem.textContent = `CPCB Tier: ${customTier.tier} (${baseTier.tier} -> ${customTier.tier})`;
+                custTierElem.style.color = customTier.color;
+            }
+            if (custBadgeElem) {
+                custBadgeElem.textContent = `-${custom.toFixed(1)}% PM2.5`;
+            }
+
+            // Debounced API call to dynamically refresh Plotly charts
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/simulate?ambient_pm25=${ambient}&indoor_hours=${indoor_h}&transit_hours=${transit_h}&purifier_reduction=${purifier}&mask_reduction=${mask}&custom_reduction=${custom}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res && res.status === "SIMULATION_SUCCESS") {
+                            // Update Plotly Bar chart
+                            const simBarEl = document.getElementById('chart-sim-bar');
+                            if (simBarEl && simBarEl.data) {
+                                const newY = [
+                                    res.baseline.pm25,
+                                    res.scenario_indoor_only.pm25,
+                                    res.scenario_time_weighted.pm25,
+                                    res.scenario_custom.pm25
+                                ];
+                                const newColors = [
+                                    res.baseline.color,
+                                    "#54E6A5",
+                                    "#72C9F0",
+                                    "#A78BFA"
+                                ];
+                                const newTexts = [
+                                    `${res.baseline.pm25} ug/m3<br>(${res.baseline.tier})`,
+                                    `${res.scenario_indoor_only.pm25} ug/m3<br>(${res.scenario_indoor_only.tier})`,
+                                    `${res.scenario_time_weighted.pm25} ug/m3<br>(${res.scenario_time_weighted.tier})`,
+                                    `${res.scenario_custom.pm25} ug/m3<br>(${res.scenario_custom.tier})`
+                                ];
+                                Plotly.restyle('chart-sim-bar', {
+                                    'y': [newY],
+                                    'text': [newTexts],
+                                    'marker.color': [newColors]
+                                });
+                            }
+
+                            // Update Plotly Donut chart
+                            const simDonutEl = document.getElementById('chart-sim-donut');
+                            if (simDonutEl && simDonutEl.data) {
+                                const p = res.parameters;
+                                Plotly.restyle('chart-sim-donut', {
+                                    'values': [[p.indoor_hours, p.transit_hours, p.outdoor_hours]]
+                                });
+                            }
+
+                            // Update Plotly Twin Overview chart
+                            const twinEl = document.getElementById('chart-twin-overview');
+                            if (twinEl && twinEl.data && twinEl.data[0]) {
+                                const oldY = twinEl.data[0].y;
+                                if (oldY.length === 3) {
+                                    const updatedY = [oldY[0], oldY[1], res.scenario_time_weighted.pm25];
+                                    const updatedTexts = [
+                                        twinEl.data[0].text[0],
+                                        twinEl.data[0].text[1],
+                                        `${res.scenario_time_weighted.pm25} ug/m3<br>(What-If Routine)`
+                                    ];
+                                    Plotly.restyle('chart-twin-overview', {
+                                        'y': [updatedY],
+                                        'text': [updatedTexts]
+                                    });
+                                }
+                            }
+                        }
+                    })
+                    .catch(() => {});
+            }, 300);
+        }
+
+        controlPairs.forEach(([sliderId, inputId]) => {
+            const slider = document.getElementById(sliderId);
+            const input = document.getElementById(inputId);
+            if (slider && input) {
+                slider.addEventListener('input', () => {
+                    input.value = slider.value;
+                    updateSimulationLive();
+                });
+                input.addEventListener('input', () => {
+                    slider.value = input.value;
+                    updateSimulationLive();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

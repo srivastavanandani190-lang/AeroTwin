@@ -1,0 +1,346 @@
+[
+  {
+    "patient_id": "SYN-T2D-001",
+    "name": "Aarav Sharma (Synthetic)",
+    "demographics": {
+      "age": 52,
+      "gender": "Male",
+      "ethnicity": "South Asian (Indian)",
+      "bmi": 28.4,
+      "weight_kg": 82.0,
+      "height_cm": 170.0,
+      "blood_type": "B+"
+    },
+    "diabetes_profile": {
+      "condition": "Type 2 Diabetes Mellitus",
+      "icd10": "E11.9",
+      "diagnosis_duration_years": 6.5,
+      "current_status": "Suboptimally Controlled with Moderate Glycemic Variability",
+      "phenotype": "Insulin Resistance Dominant",
+      "c_peptide_ng_ml": 2.1
+    },
+    "laboratory_results": {
+      "hba1c_pct": 8.4,
+      "estimated_average_glucose_mg_dl": 194.0,
+      "fasting_blood_glucose_mg_dl": 158.0,
+      "postprandial_blood_glucose_mg_dl": 224.0,
+      "egfr_ml_min_1_73m2": 78.0,
+      "serum_creatinine_mg_dl": 1.05,
+      "total_cholesterol_mg_dl": 210.0,
+      "hdl_cholesterol_mg_dl": 42.0,
+      "ldl_cholesterol_mg_dl": 134.0,
+      "triglycerides_mg_dl": 185.0
+    },
+    "medication_regimen": [
+      {
+        "drug": "Metformin Hydrochloride",
+        "dosage": "1000 mg",
+        "frequency": "Twice daily with meals",
+        "class": "Biguanide"
+      },
+      {
+        "drug": "Glimepiride",
+        "dosage": "2 mg",
+        "frequency": "Once daily before breakfast",
+        "class": "Sulfonylurea"
+      },
+      {
+        "drug": "Atorvastatin",
+        "dosage": "20 mg",
+        "frequency": "Once daily at bedtime",
+        "class": "HMG-CoA Reductase Inhibitor"
+      }
+    ],
+    "vitals_baseline": {
+      "systolic_bp_mmhg": 136,
+      "diastolic_bp_mmhg": 84,
+      "resting_heart_rate_bpm": 76,
+      "baseline_hrv_sdnn_ms": 38.5
+    },
+    "comorbidities": [
+      "Essential Hypertension (Grade 1)",
+      "Mild Non-Proliferative Diabetic Retinopathy"
+    ],
+    "lifestyle_profile": {
+      "activity_level": "Sedentary to Moderately Active",
+      "typical_daily_steps": 4800,
+      "sleep_duration_hours": 6.5,
+      "dietary_pattern": "Standard Vegetarian Indian (High Carbohydrate: Roti/Rice)"
+    },
+    "data_provenance": "Deterministically generated synthetic cohort using physiological bounds calibrated to South Asian T2D epidemiological profiles (ICMR/RSSDI consensus)."
+  },
+  {
+    "patient_id": "SYN-T2D-002",
+    "name": "Priya Patel (Synthetic)",
+    "demographics": {
+      "age": 44,
+      "gender": "Female",
+      "ethnicity": "South Asian (Indian)",
+      "bmi": 26.2,
+      "weight_kg": 64.0,
+      "height_cm": 156.0,
+      "blood_type": "O+"
+    },
+    "diabetes_profile": {
+      "condition": "Type 2 Diabetes Mellitus",
+      "icd10": "E11.9",
+      "diagnosis_duration_years": 2.0,
+      "current_status": "Early Stage - Good Glycemic Control with Occasional Postprandial Spikes",
+      "phenotype": "Early Beta-Cell Dysfunction",
+      "c_peptide_ng_ml": 2.8
+    },
+    "laboratory_results": {
+      "hba1c_pct": 6.8,
+      "estimated_average_glucose_mg_dl": 148.0,
+      "fasting_blood_glucose_mg_dl": 118.0,
+      "postprandial_blood_glucose_mg_dl": 172.0,
+      "egfr_ml_min_1_73m2": 95.0,
+      "serum_creatinine_mg_dl": 0.82,
+      "total_cholesterol_mg_dl": 182.0,
+      "hdl_cholesterol_mg_dl": 54.0,
+      "ldl_cholesterol_mg_dl": 102.0,
+      "triglycerides_mg_dl": 130.0
+    },
+    "medication_regimen": [
+      {
+        "drug": "Metformin Hydrochloride Extended-Release",
+        "dosage": "500 mg",
+        "frequency": "Twice daily with meals",
+        "class": "Biguanide"
+      },
+      {
+        "drug": "Sitagliptin",
+        "dosage": "50 mg",
+        "frequency": "Once daily",
+        "class": "DPP-4 Inhibitor"
+      }
+    ],
+    "vitals_baseline": {
+      "systolic_bp_mmhg": 122,
+      "diastolic_bp_mmhg": 78,
+      "resting_heart_rate_bpm": 70,
+      "baseline_hrv_sdnn_ms": 46.0
+    },
+    "comorbidities": [
+      "None reported"
+    ],
+    "lifestyle_profile": {
+      "activity_level": "Moderately Active (Daily morning walks)",
+      "typical_daily_steps": 7600,
+      "sleep_duration_hours": 7.2,
+      "dietary_pattern": "Balanced Mixed Diet, Reduced Simple Sugars"
+    },
+    "data_provenance": "Deterministically generated synthetic cohort using physiological bounds calibrated to South Asian T2D epidemiological profiles (ICMR/RSSDI consensus)."
+  },
+  {
+    "patient_id": "SYN-T2D-003",
+    "name": "Rajesh Nair (Synthetic)",
+    "demographics": {
+      "age": 63,
+      "gender": "Male",
+      "ethnicity": "South Asian (Indian)",
+      "bmi": 31.5,
+      "weight_kg": 94.0,
+      "height_cm": 173.0,
+      "blood_type": "A+"
+    },
+    "diabetes_profile": {
+      "condition": "Type 2 Diabetes Mellitus with Microvascular Risk",
+      "icd10": "E11.22",
+      "diagnosis_duration_years": 14.0,
+      "current_status": "Severe Hyperglycemia with High Glycemic Volatility",
+      "phenotype": "Progressive Beta-Cell Depletion with Insulin Resistance",
+      "c_peptide_ng_ml": 1.2
+    },
+    "laboratory_results": {
+      "hba1c_pct": 9.6,
+      "estimated_average_glucose_mg_dl": 229.0,
+      "fasting_blood_glucose_mg_dl": 186.0,
+      "postprandial_blood_glucose_mg_dl": 268.0,
+      "egfr_ml_min_1_73m2": 58.0,
+      "serum_creatinine_mg_dl": 1.42,
+      "total_cholesterol_mg_dl": 240.0,
+      "hdl_cholesterol_mg_dl": 36.0,
+      "ldl_cholesterol_mg_dl": 158.0,
+      "triglycerides_mg_dl": 245.0
+    },
+    "medication_regimen": [
+      {
+        "drug": "Metformin Hydrochloride",
+        "dosage": "1000 mg",
+        "frequency": "Twice daily",
+        "class": "Biguanide"
+      },
+      {
+        "drug": "Dapagliflozin",
+        "dosage": "10 mg",
+        "frequency": "Once daily morning",
+        "class": "SGLT2 Inhibitor"
+      },
+      {
+        "drug": "Insulin Glargine (Basal)",
+        "dosage": "18 Units",
+        "frequency": "Once daily at bedtime",
+        "class": "Long-Acting Insulin Analogue"
+      },
+      {
+        "drug": "Telmisartan",
+        "dosage": "40 mg",
+        "frequency": "Once daily",
+        "class": "Angiotensin II Receptor Blocker"
+      }
+    ],
+    "vitals_baseline": {
+      "systolic_bp_mmhg": 144,
+      "diastolic_bp_mmhg": 88,
+      "resting_heart_rate_bpm": 82,
+      "baseline_hrv_sdnn_ms": 28.0
+    },
+    "comorbidities": [
+      "Stage 3a Chronic Kidney Disease (Diabetic Nephropathy)",
+      "Grade 2 Hypertension",
+      "Diabetic Peripheral Neuropathy (Bilateral feet)"
+    ],
+    "lifestyle_profile": {
+      "activity_level": "Low / Limited by Peripheral Neuropathy",
+      "typical_daily_steps": 2900,
+      "sleep_duration_hours": 5.8,
+      "dietary_pattern": "Traditional South Indian (Parboiled Rice Heavy)"
+    },
+    "data_provenance": "Deterministically generated synthetic cohort using physiological bounds calibrated to South Asian T2D epidemiological profiles (ICMR/RSSDI consensus)."
+  },
+  {
+    "patient_id": "SYN-T2D-004",
+    "name": "Sunita Verma (Synthetic)",
+    "demographics": {
+      "age": 39,
+      "gender": "Female",
+      "ethnicity": "South Asian (Indian)",
+      "bmi": 27.8,
+      "weight_kg": 68.0,
+      "height_cm": 156.0,
+      "blood_type": "AB+"
+    },
+    "diabetes_profile": {
+      "condition": "Early-Onset Type 2 Diabetes Mellitus",
+      "icd10": "E11.9",
+      "diagnosis_duration_years": 3.5,
+      "current_status": "Moderate Control, Responsive to Physical Activity",
+      "phenotype": "Metabolic Syndrome Associated",
+      "c_peptide_ng_ml": 2.5
+    },
+    "laboratory_results": {
+      "hba1c_pct": 7.3,
+      "estimated_average_glucose_mg_dl": 163.0,
+      "fasting_blood_glucose_mg_dl": 132.0,
+      "postprandial_blood_glucose_mg_dl": 192.0,
+      "egfr_ml_min_1_73m2": 92.0,
+      "serum_creatinine_mg_dl": 0.88,
+      "total_cholesterol_mg_dl": 198.0,
+      "hdl_cholesterol_mg_dl": 48.0,
+      "ldl_cholesterol_mg_dl": 118.0,
+      "triglycerides_mg_dl": 160.0
+    },
+    "medication_regimen": [
+      {
+        "drug": "Metformin Hydrochloride",
+        "dosage": "850 mg",
+        "frequency": "Twice daily",
+        "class": "Biguanide"
+      },
+      {
+        "drug": "Vildagliptin",
+        "dosage": "50 mg",
+        "frequency": "Twice daily",
+        "class": "DPP-4 Inhibitor"
+      }
+    ],
+    "vitals_baseline": {
+      "systolic_bp_mmhg": 128,
+      "diastolic_bp_mmhg": 82,
+      "resting_heart_rate_bpm": 74,
+      "baseline_hrv_sdnn_ms": 41.0
+    },
+    "comorbidities": [
+      "Polycystic Ovarian Syndrome (PCOS History)",
+      "Dyslipidemia"
+    ],
+    "lifestyle_profile": {
+      "activity_level": "Variable (Working Professional, Evening Cardio)",
+      "typical_daily_steps": 6200,
+      "sleep_duration_hours": 6.8,
+      "dietary_pattern": "Urban Indian Semi-Vegetarian"
+    },
+    "data_provenance": "Deterministically generated synthetic cohort using physiological bounds calibrated to South Asian T2D epidemiological profiles (ICMR/RSSDI consensus)."
+  },
+  {
+    "patient_id": "SYN-T2D-005",
+    "name": "Vikram Sen (Synthetic)",
+    "demographics": {
+      "age": 58,
+      "gender": "Male",
+      "ethnicity": "South Asian (Indian)",
+      "bmi": 29.1,
+      "weight_kg": 85.0,
+      "height_cm": 171.0,
+      "blood_type": "O-"
+    },
+    "diabetes_profile": {
+      "condition": "Type 2 Diabetes Mellitus with High Postprandial Excursions",
+      "icd10": "E11.9",
+      "diagnosis_duration_years": 8.0,
+      "current_status": "Poor Daytime Control with Nocturnal Normoglycemia",
+      "phenotype": "Postprandial Hyperglycemia Driven",
+      "c_peptide_ng_ml": 1.8
+    },
+    "laboratory_results": {
+      "hba1c_pct": 8.8,
+      "estimated_average_glucose_mg_dl": 206.0,
+      "fasting_blood_glucose_mg_dl": 145.0,
+      "postprandial_blood_glucose_mg_dl": 248.0,
+      "egfr_ml_min_1_73m2": 72.0,
+      "serum_creatinine_mg_dl": 1.15,
+      "total_cholesterol_mg_dl": 225.0,
+      "hdl_cholesterol_mg_dl": 39.0,
+      "ldl_cholesterol_mg_dl": 142.0,
+      "triglycerides_mg_dl": 220.0
+    },
+    "medication_regimen": [
+      {
+        "drug": "Metformin Hydrochloride",
+        "dosage": "1000 mg",
+        "frequency": "Twice daily",
+        "class": "Biguanide"
+      },
+      {
+        "drug": "Empagliflozin",
+        "dosage": "25 mg",
+        "frequency": "Once daily in morning",
+        "class": "SGLT2 Inhibitor"
+      },
+      {
+        "drug": "Teneligliptin",
+        "dosage": "20 mg",
+        "frequency": "Once daily",
+        "class": "DPP-4 Inhibitor"
+      }
+    ],
+    "vitals_baseline": {
+      "systolic_bp_mmhg": 138,
+      "diastolic_bp_mmhg": 86,
+      "resting_heart_rate_bpm": 79,
+      "baseline_hrv_sdnn_ms": 33.0
+    },
+    "comorbidities": [
+      "Non-Alcoholic Fatty Liver Disease (NAFLD)",
+      "Stage 1 Hypertension"
+    ],
+    "lifestyle_profile": {
+      "activity_level": "Sedentary Desk Job",
+      "typical_daily_steps": 3900,
+      "sleep_duration_hours": 6.0,
+      "dietary_pattern": "High Carbohydrate & Frequent Snacking"
+    },
+    "data_provenance": "Deterministically generated synthetic cohort using physiological bounds calibrated to South Asian T2D epidemiological profiles (ICMR/RSSDI consensus)."
+  }
+]
