@@ -1,85 +1,158 @@
-# AeroTwin - Air Quality Prediction & Digital Twin Project
+# AeroTwin — Environmental Intelligence & Cardiorespiratory Digital Twin
 
-A beginner-friendly Python project for analyzing, modeling, and predicting air quality parameters and Air Quality Index (AQI).
+## 1. Team Details
+
+- **Team Name:** Binary Mind
+- **Team Leader:** Parth Singh
+- **Team Members:**
+  - Parth Singh — Team Leader
+  - Nandani Kumari — Team Member
+- **College:** ABES Engineering College, Ghaziabad
+- **Incubator:** N/A
 
 ---
 
-## 📁 Project Structure
+## 2. Project Title
+
+**AeroTwin: Multimodal Environmental Intelligence & In-Silico Cardiorespiratory Digital Twin**
+
+---
+
+## 3. Problem Statement
+
+Ambient air pollution (specifically fine particulate matter $\text{PM}_{2.5}$ and $\text{PM}_{10}$) drives acute cardiorespiratory flare-ups, asthma exacerbations, and autonomic strain across urban populations. However, traditional municipal air quality monitors offer only population-level averages, failing to account for:
+1. Individual micro-environmental schedules (indoor vs. transit exposure).
+2. Underlying baseline clinical susceptibility (age, asthma, BMI, hypertension, smoking history).
+3. Real-time physiological strain responses (resting pulse elevation, oxygen saturation dips, HRV suppression).
+
+AeroTwin bridges this divide by fusing CPCB ground telemetry, atmospheric forecasting, and virtual cardiorespiratory twin modeling into an actionable, clinical-grade digital twin.
+
+---
+
+## 4. Healthcare Use Case
+
+AeroTwin integrates three real-time streams to drive personalized proactive interventions:
+- **🌍 Environmental Stream**: Continuous $\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{AQI}$ from ground stations synchronized with Open-Meteo forecasts.
+- **🫁 Static EHR Profile**: Patient susceptibility archetypes capturing chronological age, BMI, chronic asthma, and hypertension.
+- **⌚ Dynamic Wearable Telemetry**: Real-time physiological signals ($\Delta\text{RHR}$, $\text{SpO}_2$, $\text{HRV}$, sleep architecture, step cadence).
+
+### Clinical Interventions & What-If Simulation
+Users can simulate micro-environmental mitigations (HEPA indoor purifiers, N95 masks, commute adjustments) and observe the simulated drop in internal inhaled dose and flare-up risk probability 24 hours before peak smog episodes occur.
+
+> **Clinical Disclaimer:** AeroTwin is a research and educational prototype for analytics and risk stratification, not a validated medical diagnostic device.
+
+---
+
+## 5. Technical Stack
+
+- **Backend & APIs:** Python 3, Flask (RESTful routing, streaming endpoints)
+- **Data Engineering:** Pandas, NumPy (spatial-temporal group imputation, chronological rolling windows)
+- **Machine Learning & Modeling:** Scikit-learn, Joblib, Gradient Boosted Regression Trees
+- **Interactive Visualization:** Plotly.js, JetBrains Mono & Inter typography
+- **Frontend Architecture:** Obsidian Dark Cyber-Clinical UI (`#070A0D` canvas, `#0D1217` surfaces, `#10B981` emerald accents)
+
+---
+
+## 6. AI/ML Model & Empirical Evaluation
+
+- **Target:** 24-hour Next-Day Atmospheric $\text{PM}_{2.5}$ concentration ($\mu\text{g/m}^3$).
+- **Features:** Multi-lag pollutant concentrations ($\text{PM}_{2.5}$, $\text{PM}_{10}$, $\text{NO}_2$, $\text{CO}$, $\text{SO}_2$, $\text{AQI}$), rolling 24h moving averages, rate of change, and seasonal date vectors.
+- **Validation Strategy:** Chronological held-out test split with zero temporal data leakage.
+- **Empirical Holdout Metrics:**
+  - **Coefficient of Determination ($R^2$):** `0.8140`
+  - **Mean Absolute Error (MAE):** `12.15 µg/m³`
+  - **Root Mean Squared Error (RMSE):** `20.34 µg/m³`
+  - **CPCB Category Agreement:** `84.2%`
+- **Exposure Simulation Engine:** Physical mass-balance equation:
+  $$C_{\text{inhaled}} = \frac{T_{\text{indoor}} \cdot C_{\text{ambient}} \cdot (1 - \eta_{\text{purifier}}) + T_{\text{transit}} \cdot C_{\text{ambient}} \cdot (1 - \eta_{\text{mask}}) + T_{\text{ambient}} \cdot C_{\text{ambient}}}{24}$$
+
+---
+
+## 7. Project Architecture & Directory Guide
 
 ```text
 AeroTwin/
-├── data/
-│   ├── raw/                 # Store original, unmodified datasets here
-│   └── processed/           # Cleaned and preprocessed datasets ready for ML
-├── cleaning/
-│   └── clean_data.py        # Logic for missing values, outliers, and data transformations
-├── model/
-│   ├── prepare_data.py      # Feature engineering and data integration pipeline
-│   ├── train.py             # Script to train ML models on processed data
-│   ├── predict.py           # Functions to load model and run predictions
-│   ├── evaluate.py          # Script to compute performance metrics (MAE, RMSE, R²)
-│   ├── simulation.py        # Micro-environmental mass-balance personal exposure engine
-│   ├── test_simulation.py   # Step 7 unit tests for exposure simulation
-│   └── artifacts/           # Trained models and test evaluation metrics JSON
 ├── app/
-│   ├── app.py               # Interactive Flask web application (Vibrant Black Crystal UI)
+│   ├── app.py                     # Flask application & REST API endpoints
 │   └── templates/
-│       └── index.html       # Obsidian glass dashboard interface with AeroTwin Studio
+│       ├── index.html             # Environmental Intelligence & Data Architecture
+│       └── twin.html              # Cardiorespiratory Patient Twin interface
+├── cleaning/
+│   └── clean_data.py              # Ingestion, imputation & cleaning pipeline
+├── data/
+│   ├── healthcare/                # Synthetic patient cohorts & vitals streams
+│   ├── processed/                 # Cleaned datasets ready for deployment
+│   └── raw/                       # Raw source archives (.gitkeep)
+├── model/
+│   ├── train.py                   # Model training script
+│   ├── predict.py                 # Fast inference runtime
+│   ├── evaluate.py                # Holdout evaluation & metric generation
+│   ├── simulation.py              # What-If personal exposure simulator
+│   ├── realtime_service.py        # Live telemetry synchronization
+│   ├── artifacts/                 # Saved models (.joblib) & metrics (.json)
+│   └── healthcare/                # Cardiorespiratory twin engine & vitals
 ├── tests/
-│   └── test_step8_dashboard.py # Step 8 comprehensive integration test suite
-├── requirements.txt         # Required Python packages
-├── README.md                # Project documentation and roadmap
-└── .gitignore               # Ignored files for version control
+│   ├── test_step8_dashboard.py    # Integration test suite for dashboard & APIs
+│   ├── test_healthcare_twin.py    # Unit tests for cardiorespiratory twin
+│   └── test_csv_upload.py         # Tests for CSV upload & dynamic location
+├── requirements.txt               # Dependencies
+├── RUN_GUIDE.md                   # PowerShell local execution guide
+└── README.md                      # Project documentation
 ```
 
 ---
 
-## 🎯 Folder & File Guide
+## 8. Installation & Execution
 
-| Folder / File | Purpose |
-| :--- | :--- |
-| **`data/raw/`** | Keep original raw CSV files safe and untouched. |
-| **`data/processed/`** | Store cleaned, formatted CSV files generated by `clean_data.py`. |
-| **`cleaning/`** | Contains Python scripts responsible for data wrangling, cleaning, and preprocessing. |
-| **`model/`** | Machine learning training, inference, holdout evaluation, and physical simulation engine. |
-| **`app/`** | Interactive Flask + Plotly web dashboard featuring the AeroTwin Studio. |
-| **`tests/`** | Comprehensive integration and unit tests for Step 8 backend & UI. |
-| **`requirements.txt`** | Lists required Python libraries (`flask`, `pandas`, `scikit-learn`, `plotly`, `joblib`). |
+### 1. Clone & Setup
+```bash
+git clone https://github.com/srivastavanandani190-lang/AeroTwin.git
+cd AeroTwin
+```
 
----
+### 2. Create Virtual Environment
+```bash
+python -m venv venv
+# Windows PowerShell:
+.\venv\Scripts\Activate.ps1
+# Linux / macOS:
+source venv/bin/activate
+```
 
-## 🚀 Development Roadmap
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
 
-1. **Step 1: Setup Project Structure** *(Completed)*
-2. **Step 2: Ingest Raw Datasets** *(Completed)*
-3. **Step 3: Implement Data Cleaning Pipeline** *(Completed)*
-4. **Step 4: Exploratory Data Analysis & Quality Profiling** *(Completed)*
-5. **Step 5: Interactive Flask Dashboard (Phase 1)** *(Completed)*
-6. **Step 6: Clinical & Health Outcome Dataset Audit** *(Completed - Case B: Ambient only, no clinical endpoints)*
-7. **Step 7: 24h Atmospheric PM2.5 Forecaster & Physical Simulation Engine** *(Completed)*
-8. **Step 8: AeroTwin Interactive Dashboard Integration** *(Completed)*
-9. **Step 9: Type 2 Diabetes Healthcare Digital Twin (Happiest Health Summit 2026)** *(Completed)*
-   - Synthetic EHR profiles (5 clinical archetypes, ICMR/RSSDI consensus)
-   - Continuous 5-minute multimodal wearable streams (CGM, HR, HRV, Steps, Sleep, Quality)
-   - Dual-model 120-minute hyperglycemic excursion (&ge;180 mg/dL) & continuous trajectory forecaster
-   - Dynamic sensor replay engine with synchronized state updates
-   - 8-section Doctor-Facing interface with What-If GLUT4 behavioral simulation
+### 4. Run Test Suites (34 Tests)
+```bash
+python -m unittest tests/test_csv_upload.py tests/test_step8_dashboard.py tests/test_healthcare_twin.py
+```
 
----
-
-## 🖥️ Running AeroTwin on Windows PowerShell
-
-```powershell
-# 1. Activate your virtual environment (if using one)
-# .\venv\Scripts\Activate.ps1
-
-# 2. Run all automated test suites (37 tests total)
-python -m unittest discover -s model -p "test*.py"
-python -m unittest tests/test_step8_dashboard.py tests/test_healthcare_twin.py
-
-# 3. Launch the AeroTwin Flask Application
+### 5. Launch Application
+```bash
 python app/app.py
 ```
-Open your browser at:
-- **Healthcare Digital Twin**: `http://127.0.0.1:5000/twin`
-- **Environmental Studio**: `http://127.0.0.1:5000/`
+Access the application locally:
+- **Environmental Intelligence & Data Architecture:** `http://127.0.0.1:5000/`
+- **Patient Digital Twin:** `http://127.0.0.1:5000/twin`
+
+---
+
+## 9. Data Sources & Privacy
+
+- **CPCB Ground Sensors:** Central Pollution Control Board ambient air quality telemetry across major Indian metropolitan centers (Delhi, Ghaziabad, Ahmedabad, Mumbai, Bengaluru, etc.).
+- **Open-Meteo API:** Atmospheric weather and thermal inversion telemetry.
+- **Privacy Assurance:** Zero real patient identifiable health information (PHI) is included. All patient cohorts are calibrated in-silico based on published medical literature (ICMR / RSSDI consensus).
+
+---
+
+## 10. Open-Source License
+
+This project is licensed under the MIT License — see the LICENSE file for details.
+
+---
+
+## 11. Disclaimer
+
+AeroTwin is an engineering prototype and research proof-of-concept developed for hackathon demonstration. It is not an FDA/CDSCO certified medical device and should not be used as a substitute for clinical diagnostics or physician care.
