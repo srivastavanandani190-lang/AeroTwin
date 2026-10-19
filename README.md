@@ -1,6 +1,6 @@
 # AeroTwin — Environmental Intelligence & Healthcare Digital Twin
 
-## 1. Team Details
+## 1.Team Details
 
 - **Team Name:** Binary Mind
 - **Team Leader:** Parth Singh
