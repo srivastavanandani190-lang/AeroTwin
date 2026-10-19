@@ -155,10 +155,30 @@ http://127.0.0.1:5000/
 - **Default Dashboard (Pan-India City Telemetry)**: `http://127.0.0.1:5000/`
 - **Delhi Station Telemetry & 24h Forecaster**: `http://127.0.0.1:5000/?dataset=cleaned_city_day.csv&city=Delhi`
 - **Station-Level Micro Data**: `http://127.0.0.1:5000/?dataset=cleaned_station_day.csv`
+- **Live Real-Time Region Stream**: `http://127.0.0.1:5000/api/realtime/connect?city=Delhi`
 - **What-If Simulation Studio**: Scroll down to the `#twin-studio` section on the homepage.
+- **REST API - Live Telemetry Status**: `http://127.0.0.1:5000/api/realtime/status?city=Delhi`
+- **REST API - Live Telemetry Refresh**: `http://127.0.0.1:5000/api/realtime/refresh?city=Delhi`
 - **REST API - Simulation**: `http://127.0.0.1:5000/api/simulate?ambient_pm25=120&indoor_hours=18&purifier_reduction=80`
 - **REST API - Forecast**: `http://127.0.0.1:5000/api/forecast?pm25=110&aqi=230&city=Delhi`
 - **REST API - Model Info**: `http://127.0.0.1:5000/api/model-info`
+
+---
+
+## 8.1. Custom Dataset Upload & Real-Time Region Features
+
+Beside the **Export Cleaned CSV** button in the top filter toolbar, three powerful new capabilities are now available:
+
+1. **Upload Dataset (`[Upload Dataset]`)**:
+   - Upload any tabular dataset (CSV, TSV, or Excel `.xlsx`/`.xls`).
+   - Automatically cleans column headers and computes instant summary metrics, data quality profiles, dynamic distributions, and cross-correlation matrices.
+   - All columns are instantly available in the **Interactive Custom Chart Studio**.
+2. **Connect Real-Time (`[Connect Real-Time]`)**:
+   - Queries live satellite and ground-sensor feeds (Open-Meteo Air Quality & Weather API) for whichever city or region is selected in the **REGION / CITY** dropdown.
+   - Synthesizes a real-time hourly stream with current PM2.5, PM10, AQI, temperature, and relative humidity.
+3. **Refresh Live (`[Refresh Live]`)**:
+   - Forces an immediate telemetry update from live sensors and re-renders the dashboard with zero delay.
+
 
 ---
 

@@ -1,0 +1,44 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Logs & temp files
+*.log
+*.bak
+*.working_backup
+*.step2.bak
+
+# Secrets & Environment variables
+.env
+.env.local
+
+# Scratch directory & internal audit scripts
+scratch/
+
+# Large raw datasets (avoids GitHub 100MB file limits)
+data/raw/*.csv
+data/raw/*.json
+data/processed/features_multivariate_city_day.csv
+data/processed/station_day.csv
+data/processed/uploaded_*.csv
+data/processed/realtime_*.csv
+data/processed/live_test_*.csv
+data/processed/*test*.csv

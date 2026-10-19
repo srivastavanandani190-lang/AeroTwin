@@ -1,0 +1,134 @@
+{
+  "report_title": "AeroTwin Step 6: Dataset Validation & Target Verification",
+  "timestamp": "2026-10-16T11:52:25.313327",
+  "primary_features_dataset": {
+    "status": "VALIDATED",
+    "rows": 28108,
+    "cols": 79,
+    "cities": 26,
+    "date_min": "2015-01-01",
+    "date_max": "2020-07-01",
+    "null_count": 0,
+    "duplicate_count": 0,
+    "has_negative_values": false
+  },
+  "multi_source_catalog": {
+    "catalog_rows": 28468,
+    "source_counts": {
+      "CPCB CAAQMS": 28108,
+      "Open-Meteo Air Quality API": 360
+    },
+    "type_counts": {
+      "observed": 28108,
+      "forecast": 360
+    },
+    "is_forecast_counts": {
+      "False": 28108,
+      "True": 360
+    },
+    "forecast_file_status": "VALIDATED (360 rows \u00d7 20 cols)"
+  },
+  "target_verification": {
+    "candidate_targets": {
+      "AQI": {
+        "meaning": "Central Pollution Control Board (CPCB) continuous Air Quality Index.",
+        "dtype": "float64",
+        "range": "[13.0, 2049.0]",
+        "null_pct": "0.00%",
+        "source": "CPCB CAAQMS real ambient sensor calculations.",
+        "is_health_outcome": false,
+        "classification": "ENVIRONMENTAL METRIC (Continuous atmospheric indicator)"
+      },
+      "AQI_Bucket": {
+        "meaning": "Official CPCB air quality qualitative advisory classification.",
+        "dtype": "str",
+        "unique_values": [
+          "Poor",
+          "Very Poor",
+          "Severe",
+          "Moderate",
+          "Satisfactory",
+          "Good"
+        ],
+        "distribution": {
+          "Satisfactory": 9901,
+          "Moderate": 9617,
+          "Poor": 3000,
+          "Very Poor": 2643,
+          "Good": 1480,
+          "Severe": 1467
+        },
+        "null_pct": "0.00%",
+        "source": "CPCB official AQI bucket formulas.",
+        "is_health_outcome": false,
+        "classification": "ENVIRONMENTAL ADVISORY TIER (Ordinal atmospheric category)"
+      },
+      "is_extreme_pollution": {
+        "meaning": "Indicator of hazardous severe smog episodes (AQI > 400 or PM2.5 > 500 ug/m3).",
+        "dtype": "bool",
+        "distribution": {
+          "False": 26634,
+          "True": 1474
+        },
+        "null_pct": "0.00%",
+        "source": "Calculated threshold on CPCB sensor data.",
+        "is_health_outcome": false,
+        "classification": "ENVIRONMENTAL THRESHOLD FLAG (Severe air-pollution event)"
+      },
+      "is_severe_hazard": {
+        "meaning": "CPCB Severe category threshold flag (AQI >= 401 or PM2.5 >= 250 ug/m3).",
+        "dtype": "int64",
+        "distribution": {
+          "0": 26530,
+          "1": 1578
+        },
+        "null_pct": "0.00%",
+        "source": "Calculated CPCB threshold flag.",
+        "is_health_outcome": false,
+        "classification": "ENVIRONMENTAL THRESHOLD FLAG (CPCB hazard level)"
+      },
+      "is_unhealthy_spike": {
+        "meaning": "CPCB Poor/Very Poor air threshold flag (AQI >= 201 or PM2.5 >= 90 ug/m3).",
+        "dtype": "int64",
+        "distribution": {
+          "0": 20074,
+          "1": 8034
+        },
+        "null_pct": "0.00%",
+        "source": "Calculated CPCB threshold flag.",
+        "is_health_outcome": false,
+        "classification": "ENVIRONMENTAL THRESHOLD FLAG (Substandard air quality)"
+      }
+    },
+    "has_documented_health_outcome": false,
+    "clinical_target_status": "ABSENT_IN_DATASET"
+  },
+  "leakage_and_splits": {
+    "lookahead_leakage": "PASSED",
+    "recommended_split": {
+      "strategy": "Chronological Time-Based Split",
+      "train": {
+        "period": "2015-01-01 to 2018-12-31",
+        "rows": 16259,
+        "pct": 57.8
+      },
+      "validation": {
+        "period": "2019-01-01 to 2019-09-30",
+        "rows": 5209,
+        "pct": 18.5
+      },
+      "test": {
+        "period": "2019-10-01 to 2020-07-01",
+        "rows": 6640,
+        "pct": 23.6
+      }
+    }
+  },
+  "final_verdict": {
+    "A_dataset_validation_status": "PASSED (Clean, aligned, 0 nulls, 0 duplicates, non-negative)",
+    "B_data_quality_issues": "None requiring correction in primary modeling dataset. Forecast stream has 18 tail-end nulls due to Open-Meteo horizon cutoffs.",
+    "C_legitimate_health_target_exists": "NO. Dataset contains ambient environmental measurements only.",
+    "D_suitable_for_supervised_health_risk": "NOT SUITABLE for clinical health-risk prediction without authentic patient admission outcomes.",
+    "E_recommended_path_forward": "Proceed with Option 1: Environmental Air-Quality Forecasting (predicting Next-Day PM2.5 or Next-Day AQI) while utilizing CPCB AQI health-advisory bands for risk communication."
+  }
+}
