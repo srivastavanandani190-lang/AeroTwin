@@ -136,11 +136,13 @@ Include a demonstration of:
 
 ## 📜 09. Open-Source License
 
-**License:** MIT License
-
-**License file:** [`LICENSE`](LICENSE)
-
-**Dataset / third-party attribution:** 
+- **CPCB Air Quality Dataset**: Central Pollution Control Board (CPCB), Government of India — Released under the National Data Sharing and Accessibility Policy (NDSAP) / Open Government Data (OGD) Platform India.
+- **Synthea™ Patient Generator**: Synthetic patient data generator, licensed under the Apache License 2.0.
+- **Open-Meteo API**: Weather and air quality forecast data, licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+- **Core ML & Visualization Frameworks**:
+  - XGBoost (Apache License 2.0)
+  - scikit-learn (BSD 3-Clause License)
+  - Streamlit & Plotly (Apache License 2.0 / MIT License)
 
 ## 🏗️ 10. Architecture Diagram — PDF/PPT
 
