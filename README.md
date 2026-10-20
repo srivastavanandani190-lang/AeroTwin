@@ -30,8 +30,8 @@
 | Team Member | Nandani Kumari |
 | College | ABES Engineering College, Ghaziabad |
 | Incubator | N/A |
-| Leader Phone | |
-| Leader Email | |
+| Leader Phone | 8840541703 |
+| Leader Email | parthsingh1947@gmail.com |
 
 ## 🏛️ 02. College / Incubator Information
 
