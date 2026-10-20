@@ -38,7 +38,7 @@
 - **Institution:** ABES Engineering College
 - **Location:** Ghaziabad, Uttar Pradesh, India
 - **Incubator:** N/A
-- **Institution / Incubator URL:** 
+ 
 
 ## 🚀 03. Project Title
 
