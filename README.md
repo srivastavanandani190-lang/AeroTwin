@@ -120,21 +120,11 @@ flowchart TD
 | CPCB Category Agreement | 84.2% |
 
 *Verify these reported values against your saved evaluation artifacts before submission. They measure environmental forecasting, not clinical-event prediction.*
-
-### Exposure Simulation
-
-A simplified time-weighted concentration estimate:
-
-\[
-C_{\text{weighted}} =
-\frac{T_iC_i(1-\eta_p)+T_tC_t(1-\eta_m)+T_oC_o}{24}
-\]
-
-The estimate depends on time spent indoors, in transit, and outdoors, along with assumed filtration efficiencies.
+ 
 
 ## 🎥 08. Demo Video — 15–20 Minutes
 
-**Unlisted YouTube Link:** 
+**https://youtu.be/WdtHQbwZrHE** 
 
 Include a demonstration of:
 - Project introduction and problem statement
@@ -239,21 +229,6 @@ AeroTwin/
 - Wearable signals may be simulated rather than measured from real devices.
 - Exposure estimates depend on modeling assumptions.
 - Clinical-event prediction requires a separately developed and validated outcome model.
-
-## ✅ Hackathon Submission Checklist
-
-- [x] Team details
-- [x] College / incubator information
-- [x] Project title
-- [x] Problem statement
-- [x] Healthcare use case
-- [x] Technical stack
-- [x] AI/ML model details
-- [ ] Unlisted 15–20 minute demo video
-- [ ] MIT License file
-- [ ] Architecture diagram PDF/PPT
-- [ ] Project presentation PDF/PPT
-- [ ] All files and links publicly accessible
 
 ---
 
