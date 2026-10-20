@@ -154,7 +154,7 @@ Include a demonstration of:
 
 ## 🏗️ 10. Architecture Diagram — PDF/PPT
 
-**File:** [`docs/AeroTwin_Architecture.pdf`](docs/AeroTwin_Architecture.pdf)
+**File:** [[`docs/AeroTwin_Architecture.pdf`](docs/AeroTwin_Architecture.pdf](https://drive.google.com/file/d/1QuxBUBn6p15cPnuSeRJMI1-GbPNIy4a-/view?usp=sharing))
 
 ```mermaid
 flowchart TD
@@ -169,7 +169,7 @@ flowchart TD
 
 ## 📊 11. Project Presentation — PDF/PPT
 
-**Presentation:** [`docs/AeroTwin_Hackathon_Presentation.pdf`](docs/AeroTwin_Hackathon_Presentation.pdf)
+**Presentation:** [[`docs/AeroTwin_Hackathon_Presentation.pdf`](docs/AeroTwin_Hackathon_Presentation.pdf](https://drive.google.com/file/d/1-OyiInABxXCl2irEZzMwDmQzYg1rVU4h/view?usp=sharing))
 
 **Suggested coverage:** Problem → Solution → Data → Architecture → ML Model → Results → Live Demo → Impact → Limitations.
 
